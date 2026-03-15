@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PaySpeak</string>
+    <string name="app_subtitle">Payment Announcement Assistant</string>
+    <string name="notification_channel_name">PaySpeak Announcements</string>
+    <string name="notification_channel_description">Notifications for payment announcements</string>
+    <string name="service_listening">Listening for payments…</string>
+    <string name="accessibility_service_description">PaySpeak uses accessibility service to detect payment notifications from apps like Paytm, Google Pay, PhonePe, and bank apps to announce payment amounts.</string>
+</resources>
