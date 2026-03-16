@@ -30,40 +30,73 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
         eventManager = PaymentEventManager(PaySpeakDatabase.getInstance(this))
     }
 
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        Log.d(TAG, "✓ NotificationListenerService CONNECTED — system has bound the service, notifications will be received")
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        Log.w(TAG, "✗ NotificationListenerService DISCONNECTED — check if Notification Access is still granted in Settings")
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         try {
             val packageName = sbn.packageName
             val appHint = PackageAppMapper.mapPackage(packageName)
-            if (appHint == PaymentApp.UNKNOWN) return
+            if (appHint == PaymentApp.UNKNOWN) {
+                Log.d(TAG, "SKIP package not in supported list: $packageName")
+                return
+            }
 
             val notification = sbn.notification
             val text = extractNotificationText(notification)
-            if (text.isEmpty()) return
+            Log.d(TAG, "── Notification received ──────────────────────────")
+            Log.d(TAG, "  package  : $packageName")
+            Log.d(TAG, "  appHint  : $appHint")
+            Log.d(TAG, "  text     : $text")
+
+            if (text.isEmpty()) {
+                Log.w(TAG, "SKIP empty notification text from $packageName")
+                return
+            }
 
             if (appHint == PaymentApp.WHATSAPP) {
                 val startsWithPayment = text.trimStart().startsWith("payment", ignoreCase = true)
                 val hasCurrency = text.contains(Regex("\u20b9|rs|rupee", RegexOption.IGNORE_CASE))
                 val isCreditLike = text.contains(Regex("credited|received|got|added|to you|to u", RegexOption.IGNORE_CASE))
-                if (!(startsWithPayment && hasCurrency && isCreditLike)) return
+                Log.d(TAG, "  WhatsApp filter → startsWithPayment=$startsWithPayment, hasCurrency=$hasCurrency, isCreditLike=$isCreditLike")
+                if (!(startsWithPayment && hasCurrency && isCreditLike)) {
+                    Log.w(TAG, "SKIP WhatsApp notification did not pass payment filter")
+                    return
+                }
             }
 
-            Log.d(TAG, "Notification from $packageName: $text")
             DebugLogger.logNotificationDetected(text, "NotificationListener:$packageName")
 
-            if (!isPaymentNotification(packageName, text)) return
+            if (!isPaymentNotification(packageName, text)) {
+                Log.w(TAG, "SKIP isPaymentNotification() returned false for $packageName")
+                return
+            }
 
+            Log.d(TAG, "  → Launching extraction coroutine")
             coroutineScope.launch {
                 try {
                     val event = extractionEngine.extractPayment(text, PaymentSource.NOTIFICATION, appHint)
                     if (event != null) {
                         val adjusted = event.copy(appName = appHint)
+                        Log.d(TAG, "  extraction OK → amount=${adjusted.amount}, sender=${adjusted.sender}, app=${adjusted.appName}, confidence=${adjusted.confidenceScore}")
                         DebugLogger.logExtractionResult(adjusted.amount, adjusted.sender, adjusted.appName.name, adjusted.success, adjusted.confidenceScore)
                         val processed = eventManager.procesPaymentEvent(adjusted)
                         if (processed != null) {
+                            Log.d(TAG, "  dedup OK → broadcasting payment")
                             PaymentAnnouncementBroadcaster.broadcastPaymentDetected(this@NotificationListenerServiceImpl, processed)
                         } else {
+                            Log.w(TAG, "  SKIP dedup suppressed amount=${adjusted.amount}, sender=${adjusted.sender}")
                             DebugLogger.logDuplicateDetected(adjusted.amount, adjusted.sender)
                         }
+                    } else {
+                        Log.w(TAG, "  SKIP extraction returned null for text: $text")
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error processing notification", e)

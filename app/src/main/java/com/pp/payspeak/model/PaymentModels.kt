@@ -43,8 +43,7 @@ data class PaymentEvent(
     val source: PaymentSource,
     val confidenceScore: Float,
     val rawText: String,
-    val timestamp: Long = System.currentTimeMillis(),
-    val usedMLKit: Boolean = false
+    val timestamp: Long = System.currentTimeMillis()
 ) {
     fun getAmountInRupees(): Double = amount.toDouble() / 100
     fun getAmountAsString(): String = String.format("%.2f", getAmountInRupees())

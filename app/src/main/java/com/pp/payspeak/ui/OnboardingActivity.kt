@@ -89,13 +89,11 @@ class OnboardingActivity : AppCompatActivity() {
             }
             1 -> {
                 startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                preferenceManager.setNotificationListenerEnabled(true)
                 currentStep++
                 updateStepUI(titleText, descriptionText, actionButton)
             }
             2 -> {
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                preferenceManager.setAccessibilityEnabled(true)
                 currentStep++
                 updateStepUI(titleText, descriptionText, actionButton)
             }
@@ -113,7 +111,6 @@ class OnboardingActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS), 100)
         } else {
-            preferenceManager.setSmsPermissionEnabled(true)
             finishOnboarding()
         }
     }
@@ -122,7 +119,6 @@ class OnboardingActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                preferenceManager.setSmsPermissionEnabled(true)
                 Toast.makeText(this, "SMS permission granted", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "SMS permission denied - you can enable it later", Toast.LENGTH_SHORT).show()
@@ -137,4 +133,3 @@ class OnboardingActivity : AppCompatActivity() {
         finish()
     }
 }
-

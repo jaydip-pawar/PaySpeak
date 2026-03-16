@@ -23,12 +23,15 @@ import com.pp.payspeak.ui.MainActivity
 import com.pp.payspeak.utils.DebugLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private const val TAG = "PaymentAnnouncerService"
 private const val NOTIFICATION_ID = 1
 private const val CHANNEL_ID = "com.pp.payspeak.announcement"
+private const val COOLDOWN_MS = 3_000L
 
 class PaymentAnnouncerService : Service() {
     private lateinit var speechEngine: SpeechEngine
@@ -38,12 +41,25 @@ class PaymentAnnouncerService : Service() {
     private lateinit var paymentBroadcastReceiver: PaymentBroadcastReceiver
     private lateinit var preferenceManager: com.pp.payspeak.utils.PreferenceManager
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+
+    // Announcement-level dedup: prevents announcing the same key twice within 60 seconds
     private val recentAnnouncements = object : LinkedHashMap<String, Long>(20, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean {
             val expiry = System.currentTimeMillis() - 60_000
             return (eldest?.value ?: 0L) < expiry || size > 50
         }
     }
+
+    // Cooldown buffer: holds pending announcements keyed by amount in paise.
+    // Multiple sources (SMS, notification) reporting the same transaction
+    // land here; after COOLDOWN_MS the highest-priority source wins.
+    private class PendingAnnouncement(
+        @Volatile var bestIntent: Intent,
+        @Volatile var sourcePriority: Int,
+        val job: Job
+    )
+    private val pendingByAmount = HashMap<Long, PendingAnnouncement>()
+    private val pendingLock = Any()
 
     override fun onCreate() {
         super.onCreate()
@@ -55,6 +71,14 @@ class PaymentAnnouncerService : Service() {
         languageManager = LanguageManager().apply { setLanguage(preferenceManager.getLanguage()) }
         eventManager = PaymentEventManager(PaySpeakDatabase.getInstance(this))
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        coroutineScope.launch {
+            eventManager.cleanupDatabase()
+            while (true) {
+                delay(60 * 60_000L)
+                eventManager.cleanupDatabase()
+            }
+        }
 
         createNotificationChannel()
         val notification = createServiceNotification()
@@ -124,45 +148,100 @@ class PaymentAnnouncerService : Service() {
             if (intent?.action != "com.pp.payspeak.PAYMENT_DETECTED") return
             try {
                 val amount = intent.getLongExtra("amount", 0L)
-                val sender = intent.getStringExtra("sender") ?: "Unknown"
-                val appName = intent.getStringExtra("app") ?: ""
-                val source = intent.getStringExtra("source") ?: PaymentSource.UNKNOWN.name
-                val ts = intent.getLongExtra("timestamp", System.currentTimeMillis())
-                val announcementKey = "$amount|$sender|$appName"
-                synchronized(recentAnnouncements) {
-                    val now = System.currentTimeMillis()
-                    if (recentAnnouncements.containsKey(announcementKey)) return
-                    recentAnnouncements[announcementKey] = now
-                }
+                val sourceStr = intent.getStringExtra("source") ?: PaymentSource.UNKNOWN.name
+                val src = runCatching { PaymentSource.valueOf(sourceStr) }.getOrDefault(PaymentSource.UNKNOWN)
+                // Lower priority number = higher actual priority (NOTIFICATION=1 beats SMS=3)
+                val incomingPriority = src.priority
 
-                Log.d(TAG, "Payment detected: $amount, $sender, $appName")
-
-                coroutineScope.launch {
-                    try {
-                        val src = runCatching { PaymentSource.valueOf(source) }.getOrDefault(PaymentSource.UNKNOWN)
-                        val displayApp = if (appName.equals("UNKNOWN", true)) "" else languageManager.getAppNameInCurrentLanguage(appName)
-                        val announcement = if (src == PaymentSource.SMS) {
-                            languageManager.formatSmsAnnouncement(amount)
-                        } else {
-                            languageManager.formatAnnouncement(amount, displayApp)
+                // If a pending entry already exists for this amount, update it if
+                // the new source is higher priority, then let the existing timer fire.
+                val needsJob = synchronized(pendingLock) {
+                    val existing = pendingByAmount[amount]
+                    if (existing != null) {
+                        if (incomingPriority < existing.sourcePriority) {
+                            existing.bestIntent = intent
+                            existing.sourcePriority = incomingPriority
+                            Log.d(TAG, "Cooldown: upgraded source to $src for amount=$amount")
                         }
-                        Log.d(TAG, "Announcing: $announcement")
-                        DebugLogger.logLanguageSelection(languageManager.getCurrentLanguage().code, announcement)
-
-                        if (speechEngine.isReady()) {
-                            DebugLogger.logSpeechStart(announcement, languageManager.getCurrentLanguage().code)
-                            speechEngine.announcePayment(announcement, languageManager.getCurrentLanguage().code) {
-                                DebugLogger.logSpeechComplete()
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error announcing payment", e)
-                        DebugLogger.logSpeechError("Announcement failed", e)
+                        false
+                    } else {
+                        true
                     }
                 }
+
+                if (!needsJob) {
+                    Log.d(TAG, "Cooldown already running for amount=$amount — intent updated if higher priority")
+                    return
+                }
+
+                // Schedule delayed announcement; the winner is whichever source has
+                // the lowest priority number when the cooldown expires.
+                val job = coroutineScope.launch {
+                    delay(COOLDOWN_MS)
+                    val pending = synchronized(pendingLock) { pendingByAmount.remove(amount) }
+                    pending?.let { handleAnnouncement(it.bestIntent) }
+                }
+
+                synchronized(pendingLock) {
+                    pendingByAmount[amount] = PendingAnnouncement(intent, incomingPriority, job)
+                }
+
+                Log.d(TAG, "Cooldown started: source=$src, amount=$amount, wait=${COOLDOWN_MS}ms")
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing payment broadcast", e)
             }
+        }
+    }
+
+    private fun handleAnnouncement(intent: Intent) {
+        try {
+            val amount = intent.getLongExtra("amount", 0L)
+            val sender = intent.getStringExtra("sender") ?: "Unknown"
+            val appName = intent.getStringExtra("app") ?: ""
+            val source = intent.getStringExtra("source") ?: PaymentSource.UNKNOWN.name
+            val announcementKey = "$amount|$sender|$appName"
+            Log.d(TAG, "── handleAnnouncement ─────────────────────────────")
+            Log.d(TAG, "  amount=$amount, sender=$sender, app=$appName, source=$source")
+
+            synchronized(recentAnnouncements) {
+                val now = System.currentTimeMillis()
+                if (recentAnnouncements.containsKey(announcementKey)) {
+                    Log.w(TAG, "  SKIP recentAnnouncements dedup hit for key=$announcementKey")
+                    return
+                }
+                recentAnnouncements[announcementKey] = now
+            }
+
+            coroutineScope.launch {
+                try {
+                    val src = runCatching { PaymentSource.valueOf(source) }.getOrDefault(PaymentSource.UNKNOWN)
+                    val displayApp = if (appName.equals("UNKNOWN", true)) "" else languageManager.getAppNameInCurrentLanguage(appName)
+                    val announcement = if (src == PaymentSource.SMS) {
+                        languageManager.formatSmsAnnouncement(amount)
+                    } else {
+                        languageManager.formatAnnouncement(amount, displayApp)
+                    }
+                    Log.d(TAG, "  announcement text : $announcement")
+                    Log.d(TAG, "  language          : ${languageManager.getCurrentLanguage().code}")
+                    Log.d(TAG, "  speechEngine ready: ${speechEngine.isReady()}")
+                    DebugLogger.logLanguageSelection(languageManager.getCurrentLanguage().code, announcement)
+
+                    if (speechEngine.isReady()) {
+                        DebugLogger.logSpeechStart(announcement, languageManager.getCurrentLanguage().code)
+                        speechEngine.announcePayment(announcement, languageManager.getCurrentLanguage().code) {
+                            Log.d(TAG, "  TTS complete for: $announcement")
+                            DebugLogger.logSpeechComplete()
+                        }
+                    } else {
+                        Log.e(TAG, "  SKIP speechEngine not ready — TTS failed to initialise")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error announcing payment", e)
+                    DebugLogger.logSpeechError("Announcement failed", e)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error in handleAnnouncement", e)
         }
     }
 }

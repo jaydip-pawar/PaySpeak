@@ -122,7 +122,6 @@ class PaymentEventManager(private val database: PaySpeakDatabase) {
         result?.also { storeForHistory(it, currentLanguage) }
     }
 
-    @Suppress("unused")
     suspend fun cleanupDatabase() = withContext(Dispatchers.IO) {
         try {
             val cutoff = System.currentTimeMillis() - retainWindowMs
