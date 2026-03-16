@@ -1,5 +1,6 @@
 package com.pp.payspeak.services
 
+import android.content.ComponentName
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -37,10 +38,12 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
 
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.w(TAG, "✗ NotificationListenerService DISCONNECTED — check if Notification Access is still granted in Settings")
+        Log.w(TAG, "✗ NotificationListenerService DISCONNECTED — requesting rebind")
+        requestRebind(ComponentName(this, NotificationListenerServiceImpl::class.java))
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        Log.d(TAG, "[•] onNotificationPosted: pkg=${sbn.packageName} id=${sbn.id}")
         try {
             val packageName = sbn.packageName
             val appHint = PackageAppMapper.mapPackage(packageName)
@@ -110,13 +113,17 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
     override fun onNotificationRemoved(sbn: StatusBarNotification) {}
 
     private fun extractNotificationText(notification: android.app.Notification): String {
-        val textParts = mutableListOf<String>()
-        notification.extras.apply {
-            getCharSequence("android.title")?.let { textParts.add(it.toString()) }
-            getCharSequence("android.text")?.let { textParts.add(it.toString()) }
-            getCharSequence("android.subText")?.let { textParts.add(it.toString()) }
-        }
-        return textParts.joinToString(" ")
+        val extras = notification.extras
+        val title   = extras.getCharSequence("android.title")?.toString()
+        val text    = extras.getCharSequence("android.text")?.toString()
+        val subText = extras.getCharSequence("android.subText")?.toString()
+        val bigText = extras.getCharSequence("android.bigText")?.toString()
+        Log.d(TAG, "  extras → title='$title' | text='$text' | subText='$subText' | bigText='$bigText'")
+        // bigText wins over text — BigTextStyle notifications (GPay, most payment apps)
+        // put the full content in bigText while text holds a short truncated summary
+        return listOfNotNull(title, bigText ?: text, subText)
+            .filter { it.isNotBlank() }
+            .joinToString(" ")
     }
 
     private fun isPaymentNotification(packageName: String, text: String): Boolean {
@@ -131,7 +138,10 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
 }
 
 object PaymentAnnouncementBroadcaster {
+    private const val TAG = "PaymentBroadcaster"
+
     fun broadcastPaymentDetected(context: android.content.Context, event: com.pp.payspeak.model.PaymentEvent) {
+        Log.d(TAG, "→ Sending broadcast: amount=${event.amount}p, source=${event.source}, app=${event.appName}")
         val intent = android.content.Intent().apply {
             action = "com.pp.payspeak.PAYMENT_DETECTED"
             putExtra("amount", event.amount)
@@ -143,5 +153,6 @@ object PaymentAnnouncementBroadcaster {
             putExtra("timestamp", event.timestamp)
         }
         context.sendBroadcast(intent)
+        Log.d(TAG, "✓ Broadcast sent")
     }
 }

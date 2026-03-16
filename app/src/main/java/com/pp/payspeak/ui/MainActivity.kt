@@ -1,6 +1,7 @@
 package com.pp.payspeak.ui
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.ContentObserver
@@ -8,9 +9,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import android.widget.Button
 import android.widget.Spinner
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,13 +24,10 @@ import com.pp.payspeak.core.language.Language
 import com.pp.payspeak.core.language.LanguageManager
 import com.pp.payspeak.services.PaymentAnnouncerService
 import com.pp.payspeak.utils.PreferenceManager
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var languageManager: LanguageManager
     private lateinit var preferenceManager: PreferenceManager
-    private var isServiceToggling = false
 
     private val permissionObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
         override fun onChange(selfChange: Boolean) { updateStatus() }
@@ -61,35 +59,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        val statusText: TextView = findViewById(R.id.statusText)
-        val serviceSwitch: Switch = findViewById(R.id.serviceSwitch)
         val notificationAccessBtn: Button = findViewById(R.id.notificationAccessBtn)
         val accessibilitySettingsBtn: Button = findViewById(R.id.accessibilitySettingsBtn)
         val languageSpinner: Spinner = findViewById(R.id.languageSpinner)
         val settingsBtn: Button = findViewById(R.id.settingsButton)
-
-        serviceSwitch.isChecked = preferenceManager.isServiceEnabled()
-        serviceSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (isServiceToggling) return@setOnCheckedChangeListener
-
-            isServiceToggling = true
-            lifecycleScope.launch {
-                try {
-                    if (isChecked) {
-                        startPaymentAnnouncerService()
-                        preferenceManager.setServiceEnabled(true)
-                        showToast("PaySpeak service started ✓")
-                    } else {
-                        stopService(Intent(this@MainActivity, PaymentAnnouncerService::class.java))
-                        preferenceManager.setServiceEnabled(false)
-                        showToast("PaySpeak service stopped")
-                    }
-                } finally {
-                    isServiceToggling = false
-                }
-                updateStatus()
-            }
-        }
 
         val languageOptions = Language.values().map { it.displayName }.toTypedArray()
         val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, languageOptions)
@@ -125,19 +98,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startPaymentAnnouncerService() {
-        val intent = Intent(this, PaymentAnnouncerService::class.java)
-        startForegroundService(intent)
+        startForegroundService(Intent(this, PaymentAnnouncerService::class.java))
     }
 
     private fun updateStatus() {
         val statusText: TextView = findViewById(R.id.statusText)
-        val isEnabled = preferenceManager.isServiceEnabled()
         val notificationEnabled = isNotificationListenerGranted()
         val accessibilityEnabled = isAccessibilityServiceEnabled()
         val smsEnabled = isSmsPermissionGranted()
 
         val statusMessage = buildString {
-            append("Service: ${if (isEnabled) "✓ Running" else "○ Stopped"}\n")
             append("Notification: ${if (notificationEnabled) "✓" else "○"} | ")
             append("Accessibility: ${if (accessibilityEnabled) "✓" else "○"} | ")
             append("SMS: ${if (smsEnabled) "✓" else "○"}\n\n")
@@ -150,7 +120,6 @@ class MainActivity : AppCompatActivity() {
         statusText.text = statusMessage
     }
 
-    /** Checks the real system state — not a cached flag — so the UI is always accurate. */
     private fun isNotificationListenerGranted(): Boolean =
         NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
 
@@ -172,15 +141,16 @@ class MainActivity : AppCompatActivity() {
             Settings.Secure.getUriFor("enabled_notification_listeners"), false, permissionObserver)
         contentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES), false, permissionObserver)
+        if (isNotificationListenerGranted()) {
+            NotificationListenerService.requestRebind(
+                ComponentName(this, com.pp.payspeak.services.NotificationListenerServiceImpl::class.java))
+        }
+        startPaymentAnnouncerService()
         updateStatus()
     }
 
     override fun onPause() {
         super.onPause()
         contentResolver.unregisterContentObserver(permissionObserver)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 }

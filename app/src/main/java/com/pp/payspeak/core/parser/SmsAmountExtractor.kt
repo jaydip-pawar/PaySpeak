@@ -877,6 +877,14 @@ object SmsAmountEngine {
             r += "[CREDIT-20] 'credit card' noun removed from credit score"
         }
 
+        // UPI bank credit SMS format: "credited by Rs.X ... debited to VPA sender@handle"
+        // "debited to VPA/UPI" identifies the sender's UPI address — it is NOT a debit on our account.
+        // Cancel the false debit signals injected by "debited" keyword (+20) and "debited to" regex (+18).
+        if (Regex("""credited\b.*\bdebited\s+to\s+(vpa|upi)\b""", RegexOption.IGNORE_CASE).containsMatchIn(lower)) {
+            ds = (ds - 38.0).coerceAtLeast(0.0)
+            r += "[DEBIT-38] 'debited to VPA/UPI' in credited SMS = UPI sender reference, cancelling false debit signals"
+        }
+
         val type = when {
             cs > ds + 5.0          -> TxnType.CREDIT
             ds > cs + 5.0          -> TxnType.DEBIT

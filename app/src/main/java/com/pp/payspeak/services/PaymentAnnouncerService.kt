@@ -145,7 +145,11 @@ class PaymentAnnouncerService : Service() {
 
     private inner class PaymentBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action != "com.pp.payspeak.PAYMENT_DETECTED") return
+            Log.d(TAG, "[•] BroadcastReceiver.onReceive: action=${intent?.action}")
+            if (intent?.action != "com.pp.payspeak.PAYMENT_DETECTED") {
+                Log.w(TAG, "  SKIP unrecognized action: ${intent?.action}")
+                return
+            }
             try {
                 val amount = intent.getLongExtra("amount", 0L)
                 val sourceStr = intent.getStringExtra("source") ?: PaymentSource.UNKNOWN.name
@@ -161,7 +165,9 @@ class PaymentAnnouncerService : Service() {
                         if (incomingPriority < existing.sourcePriority) {
                             existing.bestIntent = intent
                             existing.sourcePriority = incomingPriority
-                            Log.d(TAG, "Cooldown: upgraded source to $src for amount=$amount")
+                            Log.d(TAG, "Cooldown: upgraded source to $src (priority=$incomingPriority) for amount=$amount")
+                        } else {
+                            Log.d(TAG, "Cooldown: keeping existing source (priority=${existing.sourcePriority}), ignoring $src (priority=$incomingPriority) for amount=$amount")
                         }
                         false
                     } else {
@@ -179,7 +185,11 @@ class PaymentAnnouncerService : Service() {
                 val job = coroutineScope.launch {
                     delay(COOLDOWN_MS)
                     val pending = synchronized(pendingLock) { pendingByAmount.remove(amount) }
-                    pending?.let { handleAnnouncement(it.bestIntent) }
+                    if (pending == null) {
+                        Log.w(TAG, "Cooldown fired but no pending entry for amount=$amount — already consumed?")
+                    } else {
+                        handleAnnouncement(pending.bestIntent)
+                    }
                 }
 
                 synchronized(pendingLock) {

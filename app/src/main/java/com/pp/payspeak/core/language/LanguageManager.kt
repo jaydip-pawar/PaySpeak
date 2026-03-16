@@ -8,8 +8,7 @@ private const val TAG = "LanguageManager"
 enum class Language(val code: String, val displayName: String) {
     ENGLISH("en", "English"),
     HINDI("hi", "हिंदी"),
-    MARATHI("mr", "मराठी"),
-    HINGLISH("hi_en", "Hinglish")
+    MARATHI("mr", "मराठी")
 }
 
 interface TextFormatter {
@@ -27,23 +26,23 @@ private fun splitAmount(amountPaise: Long): AmountParts {
 
 private fun formatRupeePaise(parts: AmountParts, rupeeLabel: String, paiseLabel: String): String {
     return if (parts.paise == 0L) {
-        "$rupeeLabel ${parts.rupees}"
+        "${parts.rupees} $rupeeLabel"
     } else {
-        "$rupeeLabel ${parts.rupees} $paiseLabel ${parts.paise}"
+        "${parts.rupees} $rupeeLabel ${parts.paise} $paiseLabel"
     }
 }
 
 class EnglishFormatter : TextFormatter {
     override fun formatPaymentAnnouncement(amountPaise: Long, appName: String): String {
         val parts = splitAmount(amountPaise)
-        val amountText = if (parts.paise == 0L) "${parts.rupees}" else "${parts.rupees} and ${parts.paise} cents"
+        val amountText = if (parts.paise == 0L) "${parts.rupees} rupees" else "${parts.rupees} rupees and ${parts.paise} paise"
         val appLabel = appName.ifBlank { "app" }
-        return "Received Rs $amountText on $appLabel"
+        return "Received $amountText on $appLabel"
     }
     override fun formatSmsAnnouncement(amountPaise: Long): String {
         val parts = splitAmount(amountPaise)
-        val amountText = if (parts.paise == 0L) "${parts.rupees}" else "${parts.rupees} and ${parts.paise} cents"
-        return "Payment of Rs $amountText received"
+        val amountText = if (parts.paise == 0L) "${parts.rupees} rupees" else "${parts.rupees} rupees and ${parts.paise} paise"
+        return "Payment of $amountText received"
     }
 }
 
@@ -75,20 +74,6 @@ class MarathiFormatter : TextFormatter {
     }
 }
 
-class HinglishFormatter : TextFormatter {
-    override fun formatPaymentAnnouncement(amountPaise: Long, appName: String): String {
-        val parts = splitAmount(amountPaise)
-        val amountText = formatRupeePaise(parts, "rupaye", "paise")
-        val appLabel = appName.ifBlank { "app" }
-        return "$appLabel par $amountText prapt hue"
-    }
-    override fun formatSmsAnnouncement(amountPaise: Long): String {
-        val parts = splitAmount(amountPaise)
-        val amountText = formatRupeePaise(parts, "rupaye", "paise")
-        return "$amountText receive hue"
-    }
-}
-
 class LanguageManager {
     private var currentLanguage: Language = Language.ENGLISH
     private var formatter: TextFormatter = EnglishFormatter()
@@ -102,7 +87,6 @@ class LanguageManager {
             Language.ENGLISH -> EnglishFormatter()
             Language.HINDI -> HindiFormatter()
             Language.MARATHI -> MarathiFormatter()
-            Language.HINGLISH -> HinglishFormatter()
         }
     }
 
@@ -163,7 +147,7 @@ class LanguageManager {
             "KOTAK_BANK" to "कोटक बैंक"
         )
         return when (currentLanguage) {
-            Language.ENGLISH, Language.HINGLISH -> mapEn[upper] ?: appName
+            Language.ENGLISH -> mapEn[upper] ?: appName
             Language.HINDI, Language.MARATHI -> mapHiMr[upper] ?: appName
         }
     }
@@ -178,9 +162,4 @@ class LanguageManager {
             }
         }
     }
-}
-
-private fun formatAmount(amountPaise: Long): String {
-    val parts = splitAmount(amountPaise)
-    return if (parts.paise == 0L) parts.rupees.toString() else "%s.%02d".format(parts.rupees, parts.paise)
 }

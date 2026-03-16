@@ -115,6 +115,7 @@ class PaymentEventManager(private val database: PaySpeakDatabase) {
                     timestamp = now
                 )
                 recent.addFirst(recentEvent)
+                Log.d(TAG, "Event cleared dedup — amount=${event.amount}p, source=${event.source}, sender=$senderNorm")
                 event
             }
         }
@@ -158,7 +159,10 @@ class PaymentEventManager(private val database: PaySpeakDatabase) {
 
     private fun sha1(text: String): String = try {
         MessageDigest.getInstance("SHA-1").digest(text.toByteArray()).joinToString("") { "%02x".format(it) }
-    } catch (_: Exception) { text.hashCode().toString() }
+    } catch (e: Exception) {
+        Log.w(TAG, "SHA-1 failed — falling back to hashCode (dedup may be less accurate)", e)
+        text.hashCode().toString()
+    }
 
     private fun extractUtrs(text: String): Set<String> {
         val utrRegex = Regex("""[A-Z0-9]{9,22}""", RegexOption.IGNORE_CASE)

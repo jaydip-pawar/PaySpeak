@@ -12,8 +12,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.viewpager2.widget.ViewPager2
 import com.pp.payspeak.R
+import com.pp.payspeak.services.PaymentAnnouncerService
 import com.pp.payspeak.utils.PreferenceManager
 
 class OnboardingActivity : AppCompatActivity() {
@@ -129,6 +129,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun finishOnboarding() {
         preferenceManager.setOnboardingCompleted(true)
+        startForegroundService(Intent(this, PaymentAnnouncerService::class.java))
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

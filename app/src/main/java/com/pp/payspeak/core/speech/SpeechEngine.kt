@@ -35,7 +35,10 @@ class SpeechEngine(private val context: Context) {
     init { initialize() }
 
     private fun initialize() {
-        if (isInitializing) return
+        if (isInitializing) {
+            Log.d(TAG, "initialize: already in progress, skipping")
+            return
+        }
         isInitializing = true
         isReady = false
         Log.d(TAG, "Initializing speech engine (attempt ${initializeAttempts + 1}/$maxInitializeAttempts)")
@@ -77,7 +80,10 @@ class SpeechEngine(private val context: Context) {
     }
 
     private fun retryInitialize() {
-        if (initializeAttempts >= maxInitializeAttempts) return
+        if (initializeAttempts >= maxInitializeAttempts) {
+            Log.e(TAG, "TTS init permanently failed after $maxInitializeAttempts attempts — speech disabled")
+            return
+        }
         initializeAttempts++
         Handler(Looper.getMainLooper()).postDelayed({ isInitializing = false; initialize() }, 500)
     }
@@ -93,8 +99,15 @@ class SpeechEngine(private val context: Context) {
     }
 
     private fun processQueue(onComplete: (() -> Unit)?) {
-        if (isSpeaking) return
-        val task = speechQueue.poll() ?: return
+        if (isSpeaking) {
+            Log.d(TAG, "processQueue: already speaking — task queued, will process after current finishes")
+            return
+        }
+        val task = speechQueue.poll()
+        if (task == null) {
+            Log.d(TAG, "processQueue: queue is empty")
+            return
+        }
         isSpeaking = true
         try {
             Log.d(TAG, "Announcing: ${task.text} in language: ${task.language}")
@@ -104,11 +117,16 @@ class SpeechEngine(private val context: Context) {
             val locale = when (task.language) {
                 "hi" -> Locale("hi", "IN")
                 "mr" -> Locale("mr", "IN")
-                "hi_en" -> Locale("hi", "IN")
                 else -> Locale.ENGLISH
             }
             textToSpeech?.let { tts ->
-                tts.language = locale
+                val langResult = tts.setLanguage(locale)
+                if (langResult == TextToSpeech.LANG_MISSING_DATA || langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.w(TAG, "Language $locale not available (result=$langResult) — falling back to English")
+                    tts.setLanguage(Locale.ENGLISH)
+                } else {
+                    Log.d(TAG, "TTS language set to $locale (result=$langResult)")
+                }
                 tts.setPitch(pitch)
                 tts.setSpeechRate(speechRate)
                 tts.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
@@ -130,7 +148,10 @@ class SpeechEngine(private val context: Context) {
                     putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, volume)
                 }
                 tts.speak(task.text, TextToSpeech.QUEUE_ADD, params, params.getString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID))
-            } ?: finishCurrent()
+            } ?: run {
+                Log.e(TAG, "TTS instance is null at speak time — dropping: '${task.text}'")
+                finishCurrent()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error announcing payment", e)
             onComplete?.invoke()
@@ -180,7 +201,10 @@ class SpeechEngine(private val context: Context) {
                     .build()
                 val result = audioManager.requestAudioFocus(focusRequest)
                 if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                    Log.d(TAG, "Audio focus granted")
                     audioFocusRequest = focusRequest
+                } else {
+                    Log.w(TAG, "Audio focus denied (result=$result) — speech may not be heard")
                 }
             }
         } catch (e: Exception) {
@@ -199,12 +223,14 @@ class SpeechEngine(private val context: Context) {
     }
 
     fun stop() {
+        Log.d(TAG, "stop() — clearing queue and halting TTS")
         textToSpeech?.stop()
         speechQueue.clear()
         isSpeaking = false
     }
 
     fun release() {
+        Log.d(TAG, "release() — shutting down TTS engine")
         stop()
         textToSpeech?.shutdown()
         textToSpeech = null

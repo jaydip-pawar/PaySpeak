@@ -12,7 +12,6 @@ class PreferenceManager(context: Context) {
         private const val KEY_TTS_SPEED = "tts_speed"
         private const val KEY_TTS_PITCH = "tts_pitch"
         private const val KEY_VOICE_VOLUME = "voice_volume"
-        private const val KEY_ENABLED = "service_enabled"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
     }
 
@@ -33,9 +32,6 @@ class PreferenceManager(context: Context) {
 
     fun getVoiceVolume(): Int = prefs.getInt(KEY_VOICE_VOLUME, 80).coerceIn(0, 100)
     fun setVoiceVolume(volume: Int) { prefs.edit().putInt(KEY_VOICE_VOLUME, volume.coerceIn(0, 100)).apply() }
-
-    fun isServiceEnabled(): Boolean = prefs.getBoolean(KEY_ENABLED, false)
-    fun setServiceEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_ENABLED, enabled).apply() }
 
     fun isOnboardingCompleted(): Boolean = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
     fun setOnboardingCompleted(completed: Boolean) { prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, completed).apply() }
