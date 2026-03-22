@@ -31,13 +31,30 @@
             android:layout_marginBottom="@dimen/spacing_md" />
 
         <!-- Hint -->
-        <TextView
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/onboarding_how_it_works_hint"
-            android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
-            android:textColor="@color/md_theme_onPrimaryContainer"
-            android:layout_marginBottom="@dimen/spacing_xxl" />
+            android:orientation="horizontal"
+            android:background="@drawable/bg_info_chip"
+            android:paddingHorizontal="@dimen/spacing_md"
+            android:paddingVertical="@dimen/spacing_sm"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="@dimen/spacing_xxl">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_info"
+                app:tint="@color/md_theme_onSurfaceVariant"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/onboarding_how_it_works_hint"
+                android:textAppearance="@style/TextAppearance.PaySpeak.LabelSmall"
+                android:layout_marginStart="@dimen/spacing_sm" />
+        </LinearLayout>
 
         <!-- Notifications Card -->
         <LinearLayout
@@ -50,16 +67,18 @@
             android:layout_marginBottom="@dimen/spacing_lg">
 
             <FrameLayout
+                android:id="@+id/containerNotificationsIcon"
                 android:layout_width="@dimen/icon_container_size"
                 android:layout_height="@dimen/icon_container_size"
-                android:background="@drawable/bg_icon_rounded_green">
+                android:background="@drawable/bg_icon_rounded_white">
 
                 <ImageView
+                    android:id="@+id/iconNotifications"
                     android:layout_width="@dimen/icon_size_medium"
                     android:layout_height="@dimen/icon_size_medium"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_notifications"
-                    app:tint="@color/md_theme_onSecondaryContainer"
+                    app:tint="@color/md_theme_secondary"
                     android:contentDescription="@null" />
             </FrameLayout>
 
@@ -104,16 +123,18 @@
             android:layout_marginBottom="@dimen/spacing_lg">
 
             <FrameLayout
+                android:id="@+id/containerSmsIcon"
                 android:layout_width="@dimen/icon_container_size"
                 android:layout_height="@dimen/icon_container_size"
-                android:background="@drawable/bg_icon_rounded_gray">
+                android:background="@drawable/bg_icon_rounded_white">
 
                 <ImageView
+                    android:id="@+id/iconSms"
                     android:layout_width="@dimen/icon_size_medium"
                     android:layout_height="@dimen/icon_size_medium"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_sms"
-                    app:tint="@color/md_theme_onSurfaceVariant"
+                    app:tint="@color/md_theme_secondary"
                     android:contentDescription="@null" />
             </FrameLayout>
 
@@ -157,16 +178,18 @@
             android:gravity="center_vertical">
 
             <FrameLayout
+                android:id="@+id/containerAccessibilityIcon"
                 android:layout_width="@dimen/icon_container_size"
                 android:layout_height="@dimen/icon_container_size"
-                android:background="@drawable/bg_icon_rounded_gray">
+                android:background="@drawable/bg_icon_rounded_white">
 
                 <ImageView
+                    android:id="@+id/iconAccessibility"
                     android:layout_width="@dimen/icon_size_medium"
                     android:layout_height="@dimen/icon_size_medium"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_accessibility"
-                    app:tint="@color/md_theme_onSurfaceVariant"
+                    app:tint="@color/md_theme_secondary"
                     android:contentDescription="@null" />
             </FrameLayout>
 

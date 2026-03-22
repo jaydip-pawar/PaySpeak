@@ -12,21 +12,34 @@
         android:orientation="vertical"
         android:paddingHorizontal="@dimen/onboarding_horizontal_padding"
         android:paddingTop="@dimen/spacing_lg"
-        android:paddingBottom="@dimen/spacing_lg">
+        android:paddingBottom="@dimen/spacing_lg"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <!-- Shield Illustration -->
         <FrameLayout
-            android:layout_width="144dp"
-            android:layout_height="144dp"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/spacing_xxl">
+            android:layout_marginBottom="@dimen/spacing_xxl"
+            android:background="@drawable/bg_illustration_glow"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <FrameLayout
+                android:layout_width="164dp"
+                android:layout_height="164dp"
+                android:layout_gravity="center"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
             <!-- Main container with rounded corners -->
             <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_gravity="center"
                 android:background="@drawable/bg_illustration_container"
-                android:elevation="2dp">
+                android:elevation="0dp">
 
                 <!-- Inner green circle with shield icon -->
                 <FrameLayout
@@ -50,8 +63,8 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_gravity="top|end"
-                android:background="@drawable/bg_icon_rounded_white"
-                android:elevation="4dp"
+                android:background="@drawable/bg_icon_rounded_white_bordered"
+                android:elevation="0dp"
                 android:padding="10dp">
 
                 <ImageView
@@ -67,8 +80,8 @@
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_gravity="bottom|start"
-                android:background="@drawable/bg_icon_rounded_white"
-                android:elevation="4dp"
+                android:background="@drawable/bg_icon_rounded_white_bordered"
+                android:elevation="0dp"
                 android:padding="10dp">
 
                 <ImageView
@@ -77,6 +90,7 @@
                     android:src="@drawable/ic_vpn_key"
                     app:tint="@color/md_theme_secondary"
                     android:contentDescription="@null" />
+            </FrameLayout>
             </FrameLayout>
         </FrameLayout>
 

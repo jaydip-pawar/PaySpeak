@@ -61,113 +61,13 @@
         </LinearLayout>
 
         <!-- Anonymization visualization -->
-        <FrameLayout
+        <ImageView
+            android:id="@+id/ivSensitiveVisualization"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
             android:layout_marginBottom="@dimen/spacing_xxl"
-            android:paddingVertical="@dimen/spacing_lg">
-
-            <!-- Mock SMS card 1 -->
-            <LinearLayout
-                android:layout_width="260dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@drawable/bg_card_white"
-                android:padding="@dimen/spacing_md"
-                android:gravity="center_vertical"
-                android:elevation="2dp"
-                android:rotation="-1"
-                android:layout_gravity="start">
-
-                <ImageView
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_sms"
-                    app:tint="@color/md_theme_secondary"
-                    android:contentDescription="@null" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="@dimen/spacing_md">
-
-                    <View
-                        android:layout_width="96dp"
-                        android:layout_height="6dp"
-                        android:background="@drawable/bg_dot_inactive"
-                        android:layout_marginBottom="6dp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="10dp"
-                        android:background="@drawable/bg_dot_inactive"
-                        android:alpha="0.5" />
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- Mock SMS card 2 (anonymized) -->
-            <LinearLayout
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@drawable/bg_card_white"
-                android:padding="@dimen/spacing_md"
-                android:gravity="center_vertical"
-                android:elevation="3dp"
-                android:rotation="2"
-                android:layout_gravity="end"
-                android:layout_marginTop="40dp">
-
-                <ImageView
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_lock"
-                    app:tint="@color/md_theme_secondary"
-                    android:contentDescription="@null" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="@dimen/spacing_md">
-
-                    <!-- Masked dots -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="6dp">
-
-                        <View
-                            android:layout_width="12dp"
-                            android:layout_height="6dp"
-                            android:background="@drawable/bg_dot_active"
-                            android:alpha="0.2"
-                            android:layout_marginEnd="4dp" />
-                        <View
-                            android:layout_width="12dp"
-                            android:layout_height="6dp"
-                            android:background="@drawable/bg_dot_active"
-                            android:alpha="0.2"
-                            android:layout_marginEnd="4dp" />
-                        <View
-                            android:layout_width="12dp"
-                            android:layout_height="6dp"
-                            android:background="@drawable/bg_dot_active"
-                            android:alpha="0.2" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="80dp"
-                        android:layout_height="8dp"
-                        android:background="@drawable/bg_dot_active"
-                        android:alpha="0.1" />
-                </LinearLayout>
-            </LinearLayout>
-        </FrameLayout>
+            android:contentDescription="@string/onboarding_improve_title" />
 
         <!-- Toggle card -->
         <LinearLayout
