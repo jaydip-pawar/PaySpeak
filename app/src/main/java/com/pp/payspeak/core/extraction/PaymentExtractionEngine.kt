@@ -83,7 +83,8 @@ class PaymentExtractionEngine {
             return null
         }
 
-        val amountPaise = (winner.value * 100).toLong()
+        // BUG-05: Math.round avoids float truncation (e.g. 99.99*100 = 9998.999 → toLong = 9998; round = 9999)
+        val amountPaise = Math.round(winner.value * 100)
         if (amountPaise <= 0) return null
 
         val confidence = when (result.spamResult.confidence) {

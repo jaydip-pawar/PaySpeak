@@ -546,8 +546,8 @@ object SmsAmountEngine {
             '५' to '5','६' to '6','७' to '7','८' to '8','९' to '9'
         )
         s = s.map { devMap.getOrDefault(it, it) }.joinToString("")
-        s = LAKH_RE.replace(s)  { mr -> (mr.groupValues[1].toDoubleOrNull()?.times(100000)?.toLong()  ?: mr.value).toString() }
-        s = CRORE_RE.replace(s) { mr -> (mr.groupValues[1].toDoubleOrNull()?.times(10000000)?.toLong() ?: mr.value).toString() }
+        s = LAKH_RE.replace(s)  { mr -> (mr.groupValues[1].toDoubleOrNull()?.times(100000)?.let { Math.round(it) }  ?: mr.value).toString() }
+        s = CRORE_RE.replace(s) { mr -> (mr.groupValues[1].toDoubleOrNull()?.times(10000000)?.let { Math.round(it) } ?: mr.value).toString() }
         s = s.replace(Regex("""(\d)-(\d)"""), "$1$2")
         s = s.lowercase()
         return s

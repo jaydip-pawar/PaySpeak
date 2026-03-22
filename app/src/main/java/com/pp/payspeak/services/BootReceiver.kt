@@ -10,7 +10,9 @@ private const val TAG = "BootReceiver"
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        val isHandledAction = intent.action == Intent.ACTION_BOOT_COMPLETED ||
+                intent.action == Intent.ACTION_MY_PACKAGE_REPLACED
+        if (!isHandledAction) return
 
         try {
             Log.d(TAG, "Boot completed, starting PaymentAnnouncerService")
@@ -30,4 +32,3 @@ class BootReceiver : BroadcastReceiver() {
         }
     }
 }
-

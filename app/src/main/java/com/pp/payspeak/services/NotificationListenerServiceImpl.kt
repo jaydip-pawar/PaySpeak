@@ -21,7 +21,8 @@ private const val TAG = "NotificationListener"
 class NotificationListenerServiceImpl : NotificationListenerService() {
     private lateinit var extractionEngine: PaymentExtractionEngine
     private lateinit var eventManager: PaymentEventManager
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val serviceJob = SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + serviceJob)
 
     override fun onCreate() {
         super.onCreate()
@@ -119,8 +120,6 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
         val subText = extras.getCharSequence("android.subText")?.toString()
         val bigText = extras.getCharSequence("android.bigText")?.toString()
         Log.d(TAG, "  extras → title='$title' | text='$text' | subText='$subText' | bigText='$bigText'")
-        // bigText wins over text — BigTextStyle notifications (GPay, most payment apps)
-        // put the full content in bigText while text holds a short truncated summary
         return listOfNotNull(title, bigText ?: text, subText)
             .filter { it.isNotBlank() }
             .joinToString(" ")
@@ -134,6 +133,7 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
         super.onDestroy()
         Log.d(TAG, "NotificationListenerService destroyed")
         DebugLogger.logServiceStop("NotificationListener")
+        serviceJob.cancel()
     }
 }
 
@@ -152,6 +152,7 @@ object PaymentAnnouncementBroadcaster {
             putExtra("confidence", event.confidenceScore)
             putExtra("timestamp", event.timestamp)
         }
+        intent.setPackage(context.packageName)
         context.sendBroadcast(intent)
         Log.d(TAG, "✓ Broadcast sent")
     }

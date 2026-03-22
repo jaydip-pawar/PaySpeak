@@ -19,7 +19,10 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         preferenceManager = PreferenceManager(this)
-        speechEngine = SpeechEngine(this)
+        // LEAK-01: use applicationContext — TextToSpeech holds an internal reference to the
+        // context, so passing Activity leaks the entire Activity until TTS init completes.
+        // On device rotation during init, the old Activity would be unreachable by GC.
+        speechEngine = SpeechEngine(applicationContext)
 
         setupUI()
     }
@@ -119,4 +122,3 @@ class SettingsActivity : AppCompatActivity() {
         speechEngine?.release()
     }
 }
-

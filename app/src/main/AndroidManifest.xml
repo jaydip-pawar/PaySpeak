@@ -6,7 +6,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- BOOT-03: FOREGROUND_SERVICE_DATA_SYNC removed — dataSync type has a 6-hour runtime
+         limit on Android 14+ which would kill this always-on service silently -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -47,7 +48,7 @@
             android:name=".services.PaymentAnnouncerService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback|dataSync" />
+            android:foregroundServiceType="mediaPlayback" />
 
         <service
             android:name=".services.NotificationListenerServiceImpl"
@@ -74,15 +75,18 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <receiver android:name=".services.SMSBroadcastReceiver" android:enabled="true" android:exported="true">
+        <receiver android:name=".services.SMSBroadcastReceiver" android:enabled="true" android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".services.BootReceiver" android:enabled="true" android:exported="true">
+        <receiver android:name=".services.BootReceiver" android:enabled="true" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- LIFECYCLE-05: restart service after OTA app update, not just on device reboot -->
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
 

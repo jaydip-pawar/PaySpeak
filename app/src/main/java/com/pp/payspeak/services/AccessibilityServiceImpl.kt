@@ -20,7 +20,8 @@ private const val TAG = "AccessibilityService"
 class AccessibilityServiceImpl : AccessibilityService() {
     private lateinit var extractionEngine: PaymentExtractionEngine
     private lateinit var eventManager: PaymentEventManager
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val serviceJob = SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + serviceJob)
     private val paymentPackages = listOf(
         "com.paytm",
         "com.google.android.apps.nbu.paisa.user",
@@ -59,7 +60,7 @@ class AccessibilityServiceImpl : AccessibilityService() {
                                     DebugLogger.logExtractionResult(extractedEvent.amount, extractedEvent.sender, extractedEvent.appName.name, extractedEvent.success, extractedEvent.confidenceScore)
                                     val processed = eventManager.procesPaymentEvent(extractedEvent)
                                     if (processed != null) {
-                                        PaymentAnnouncementBroadcaster.broadcastPaymentDetected(this@AccessibilityServiceImpl, extractedEvent)
+                                        PaymentAnnouncementBroadcaster.broadcastPaymentDetected(this@AccessibilityServiceImpl, processed)
                                     } else {
                                         DebugLogger.logDuplicateDetected(extractedEvent.amount, extractedEvent.sender)
                                     }
@@ -81,7 +82,7 @@ class AccessibilityServiceImpl : AccessibilityService() {
         val info = AccessibilityServiceInfo().apply {
             eventTypes = AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED or AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-            flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS
+            flags = AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
             notificationTimeout = 100
         }
         serviceInfo = info
@@ -95,6 +96,7 @@ class AccessibilityServiceImpl : AccessibilityService() {
         super.onDestroy()
         Log.d(TAG, "AccessibilityService destroyed")
         DebugLogger.logServiceStop("AccessibilityService")
+        serviceJob.cancel()
     }
 
     private fun extractAccessibilityEventText(event: AccessibilityEvent): String {

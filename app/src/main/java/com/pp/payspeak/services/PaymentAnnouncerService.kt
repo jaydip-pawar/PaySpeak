@@ -9,8 +9,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.pp.payspeak.R
@@ -40,9 +42,9 @@ class PaymentAnnouncerService : Service() {
     private lateinit var notificationManager: NotificationManager
     private lateinit var paymentBroadcastReceiver: PaymentBroadcastReceiver
     private lateinit var preferenceManager: com.pp.payspeak.utils.PreferenceManager
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val serviceJob = SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.Default + serviceJob)
 
-    // Announcement-level dedup: prevents announcing the same key twice within 60 seconds
     private val recentAnnouncements = object : LinkedHashMap<String, Long>(20, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Long>?): Boolean {
             val expiry = System.currentTimeMillis() - 60_000
@@ -50,9 +52,6 @@ class PaymentAnnouncerService : Service() {
         }
     }
 
-    // Cooldown buffer: holds pending announcements keyed by amount in paise.
-    // Multiple sources (SMS, notification) reporting the same transaction
-    // land here; after COOLDOWN_MS the highest-priority source wins.
     private class PendingAnnouncement(
         @Volatile var bestIntent: Intent,
         @Volatile var sourcePriority: Int,
@@ -82,11 +81,13 @@ class PaymentAnnouncerService : Service() {
 
         createNotificationChannel()
         val notification = createServiceNotification()
-        runCatching { startForeground(NOTIFICATION_ID, notification) }
-            .onFailure {
-                Log.e(TAG, "Failed to promote to foreground", it)
-                runCatching { notificationManager.notify(NOTIFICATION_ID, notification) }
-            }
+        val foregroundResult = runCatching { startForeground(NOTIFICATION_ID, notification) }
+        if (foregroundResult.isFailure) {
+            Log.e(TAG, "Failed to promote to foreground", foregroundResult.exceptionOrNull())
+            showForegroundFailureNotification()
+            stopSelf()
+            return
+        }
 
         paymentBroadcastReceiver = PaymentBroadcastReceiver()
         val filter = IntentFilter("com.pp.payspeak.PAYMENT_DETECTED")
@@ -111,12 +112,17 @@ class PaymentAnnouncerService : Service() {
         super.onDestroy()
         Log.d(TAG, "Service destroyed")
         DebugLogger.logServiceStop("PaymentAnnouncerService")
-        try {
-            unregisterReceiver(paymentBroadcastReceiver)
-            speechEngine.release()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error cleaning up service", e)
+        if (::paymentBroadcastReceiver.isInitialized) {
+            try { unregisterReceiver(paymentBroadcastReceiver) } catch (e: Exception) {
+                Log.e(TAG, "Error unregistering receiver", e)
+            }
         }
+        if (::speechEngine.isInitialized) {
+            try { speechEngine.release() } catch (e: Exception) {
+                Log.e(TAG, "Error releasing speech engine", e)
+            }
+        }
+        serviceJob.cancel()
     }
 
     private fun createNotificationChannel() {
@@ -143,6 +149,25 @@ class PaymentAnnouncerService : Service() {
             .build()
     }
 
+    private fun showForegroundFailureNotification() {
+        val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, settingsIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText("PaySpeak could not start in the background. Tap to open app settings.")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+        runCatching { notificationManager.notify(NOTIFICATION_ID + 1, notification) }
+    }
+
     private inner class PaymentBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "[•] BroadcastReceiver.onReceive: action=${intent?.action}")
@@ -154,11 +179,8 @@ class PaymentAnnouncerService : Service() {
                 val amount = intent.getLongExtra("amount", 0L)
                 val sourceStr = intent.getStringExtra("source") ?: PaymentSource.UNKNOWN.name
                 val src = runCatching { PaymentSource.valueOf(sourceStr) }.getOrDefault(PaymentSource.UNKNOWN)
-                // Lower priority number = higher actual priority (NOTIFICATION=1 beats SMS=3)
                 val incomingPriority = src.priority
 
-                // If a pending entry already exists for this amount, update it if
-                // the new source is higher priority, then let the existing timer fire.
                 val needsJob = synchronized(pendingLock) {
                     val existing = pendingByAmount[amount]
                     if (existing != null) {
@@ -180,8 +202,6 @@ class PaymentAnnouncerService : Service() {
                     return
                 }
 
-                // Schedule delayed announcement; the winner is whichever source has
-                // the lowest priority number when the cooldown expires.
                 val job = coroutineScope.launch {
                     delay(COOLDOWN_MS)
                     val pending = synchronized(pendingLock) { pendingByAmount.remove(amount) }

@@ -41,10 +41,11 @@ class CommonPaymentParser : PaymentParser {
                 Log.w(TAG, "parse FAIL — amount not parseable: '$amountStr' | text: $text")
                 return null
             }
-            val amountPaise = amountDouble * 100
+            // BUG-05: Math.round avoids float truncation (99.99*100 = 9998.999 → toLong = 9998 wrong; round = 9999 correct)
+            val amountPaise = Math.round(amountDouble * 100)
             val isCredit = creditRegex.containsMatchIn(text)
             val isDebit  = debitRegex.containsMatchIn(text)
-            Log.d(TAG, "parse → amount=${amountPaise.toLong()}p, isCredit=$isCredit, isDebit=$isDebit | text: $text")
+            Log.d(TAG, "parse → amount=${amountPaise}p, isCredit=$isCredit, isDebit=$isDebit | text: $text")
             if (!isCredit) {
                 Log.w(TAG, "parse FAIL — no credit signal found")
                 return null
@@ -55,10 +56,10 @@ class CommonPaymentParser : PaymentParser {
             }
 
             val sender = senderRegex.find(text)?.groupValues?.getOrNull(1)?.trim()?.ifBlank { "Unknown" } ?: "Unknown"
-            Log.d(TAG, "parse OK → amount=${amountPaise.toLong()}p, sender=$sender, source=$source")
+            Log.d(TAG, "parse OK → amount=${amountPaise}p, sender=$sender, source=$source")
 
             PaymentEvent(
-                amount = amountPaise.toLong(),
+                amount = amountPaise,
                 sender = sender,
                 appName = PaymentApp.UNKNOWN,
                 success = true,

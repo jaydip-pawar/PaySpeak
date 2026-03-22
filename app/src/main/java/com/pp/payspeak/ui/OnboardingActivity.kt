@@ -104,12 +104,18 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun requestSmsPermission() {
-        val titleText: TextView = findViewById(R.id.onboardingTitle)
-        val descriptionText: TextView = findViewById(R.id.onboardingDescription)
-        val actionButton: Button = findViewById(R.id.onboardingActionBtn)
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECEIVE_SMS, Manifest.permission.READ_SMS), 100)
+            // PERM-01: POST_NOTIFICATIONS is a runtime permission on Android 13+ (API 33).
+            // Without it, the foreground "PaySpeak is running" notification is silently
+            // suppressed — user has no indicator the service is active.
+            val permissions = mutableListOf(
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.READ_SMS
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 100)
         } else {
             finishOnboarding()
         }

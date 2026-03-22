@@ -3,52 +3,50 @@ package com.pp.payspeak.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Telephony
 import android.telephony.SmsMessage
 import android.util.Log
 import com.pp.payspeak.core.deduplication.PaymentEventManager
 import com.pp.payspeak.core.extraction.PaymentExtractionEngine
 import com.pp.payspeak.database.PaySpeakDatabase
+import com.pp.payspeak.model.PaymentApp
 import com.pp.payspeak.model.PaymentSource
 import com.pp.payspeak.utils.DebugLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 private const val TAG = "SMSBroadcastReceiver"
 
 class SMSBroadcastReceiver : BroadcastReceiver() {
-    private lateinit var extractionEngine: PaymentExtractionEngine
-    private lateinit var eventManager: PaymentEventManager
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Telephony.Sms.Intents.SMS_RECEIVED_ACTION) return
 
-        try {
-            extractionEngine = PaymentExtractionEngine()
-            eventManager = PaymentEventManager(PaySpeakDatabase.getInstance(context))
-            val messages = extractSmsMessages(intent)
+        val pendingResult = goAsync()
 
-            for (smsMessage in messages) {
-                val sender = smsMessage.originatingAddress ?: "Unknown"
-                val messageBody = smsMessage.messageBody
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val extractionEngine = PaymentExtractionEngine()
+                val eventManager = PaymentEventManager(PaySpeakDatabase.getInstance(context))
+                val messages = extractSmsMessages(intent)
 
-                Log.d(TAG, "SMS received from $sender: $messageBody")
-                DebugLogger.logSmsDetected(sender, messageBody)
+                for (smsMessage in messages) {
+                    val sender = smsMessage.originatingAddress ?: "Unknown"
+                    val messageBody = smsMessage.messageBody
 
-                if (!isBankSMS(sender, messageBody)) continue
+                    Log.d(TAG, "SMS received from $sender: $messageBody")
+                    DebugLogger.logSmsDetected(sender, messageBody)
 
-                coroutineScope.launch {
+                    if (!isBankSMS(sender, messageBody)) continue
+
                     try {
                         val event = extractionEngine.extractPayment(messageBody, PaymentSource.SMS)
                         if (event != null) {
                             DebugLogger.logExtractionResult(event.amount, event.sender, event.appName.name, event.success, event.confidenceScore)
                             val processed = eventManager.procesPaymentEvent(event)
                             if (processed != null) {
-                                val smsEvent = event.copy(appName = com.pp.payspeak.model.PaymentApp.UNKNOWN)
+                                val smsEvent = processed.copy(appName = PaymentApp.UNKNOWN)
                                 PaymentAnnouncementBroadcaster.broadcastPaymentDetected(context, smsEvent)
                             } else {
                                 DebugLogger.logDuplicateDetected(event.amount, event.sender)
@@ -58,9 +56,9 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
                         Log.e(TAG, "Error processing SMS", e)
                     }
                 }
+            } finally {
+                pendingResult.finish()
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error in onReceive", e)
         }
     }
 
@@ -70,9 +68,7 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
         val pdus = intent.extras?.get("pdus") as? Array<*> ?: return emptyList()
         val format = intent.extras?.getString("format") ?: ""
         return pdus.mapNotNull { pdu ->
-            if (pdu is ByteArray) {
-                SmsMessage.createFromPdu(pdu, format)
-            } else null
+            if (pdu is ByteArray) SmsMessage.createFromPdu(pdu, format) else null
         }
     }
 

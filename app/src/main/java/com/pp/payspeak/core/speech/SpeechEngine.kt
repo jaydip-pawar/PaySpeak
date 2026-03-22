@@ -12,6 +12,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import java.util.Locale
 import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val TAG = "SpeechEngine"
 
@@ -29,12 +30,17 @@ class SpeechEngine(private val context: Context) {
     private var initializeAttempts = 0
     private val maxInitializeAttempts = 3
     @Volatile private var isInitializing = false
-    @Volatile private var isSpeaking = false
+    private val isSpeaking = AtomicBoolean(false)
+    @Volatile private var isReleased = false
     private var previousMusicVolume: Int? = null
 
     init { initialize() }
 
     private fun initialize() {
+        if (isReleased) {
+            Log.d(TAG, "initialize: engine already released, skipping")
+            return
+        }
         if (isInitializing) {
             Log.d(TAG, "initialize: already in progress, skipping")
             return
@@ -85,7 +91,10 @@ class SpeechEngine(private val context: Context) {
             return
         }
         initializeAttempts++
-        Handler(Looper.getMainLooper()).postDelayed({ isInitializing = false; initialize() }, 500)
+        Handler(Looper.getMainLooper()).postDelayed({
+            isInitializing = false
+            if (!isReleased) initialize()
+        }, 500)
     }
 
     fun announcePayment(announcement: String, language: String = "en", onComplete: (() -> Unit)? = null) {
@@ -99,16 +108,16 @@ class SpeechEngine(private val context: Context) {
     }
 
     private fun processQueue(onComplete: (() -> Unit)?) {
-        if (isSpeaking) {
+        if (!isSpeaking.compareAndSet(false, true)) {
             Log.d(TAG, "processQueue: already speaking — task queued, will process after current finishes")
             return
         }
         val task = speechQueue.poll()
         if (task == null) {
             Log.d(TAG, "processQueue: queue is empty")
+            isSpeaking.set(false)
             return
         }
-        isSpeaking = true
         try {
             Log.d(TAG, "Announcing: ${task.text} in language: ${task.language}")
             boostVolumeToMax()
@@ -160,7 +169,7 @@ class SpeechEngine(private val context: Context) {
     }
 
     private fun finishCurrent() {
-        isSpeaking = false
+        isSpeaking.set(false)
         restoreVolume()
         abandonAudioFocus()
         wakeLock?.release()
@@ -226,11 +235,21 @@ class SpeechEngine(private val context: Context) {
         Log.d(TAG, "stop() — clearing queue and halting TTS")
         textToSpeech?.stop()
         speechQueue.clear()
-        isSpeaking = false
+        // TTS-02: if we were speaking, restore audio state that processQueue set up.
+        // Without this, volume stays at max and audio focus is never abandoned
+        // (e.g. navigation apps remain ducked) if the service is killed mid-speech.
+        val wasSpeaking = isSpeaking.getAndSet(false)
+        if (wasSpeaking) {
+            restoreVolume()
+            abandonAudioFocus()
+            if (wakeLock?.isHeld == true) wakeLock?.release()
+        }
     }
 
     fun release() {
         Log.d(TAG, "release() — shutting down TTS engine")
+        // LIFECYCLE-04: set flag first so any in-flight retryInitialize() callbacks abort
+        isReleased = true
         stop()
         textToSpeech?.shutdown()
         textToSpeech = null
