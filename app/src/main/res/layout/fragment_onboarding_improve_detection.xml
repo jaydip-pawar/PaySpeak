@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/onboarding_horizontal_padding"
+        android:paddingTop="@dimen/spacing_xxl"
+        android:paddingBottom="@dimen/spacing_lg">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_improve_title"
+            android:textAppearance="@style/TextAppearance.PaySpeak.HeadlineMedium"
+            android:textAlignment="center"
+            android:layout_marginBottom="@dimen/spacing_lg" />
+
+        <!-- Description -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_improve_description"
+            android:textAppearance="@style/TextAppearance.PaySpeak.BodyLarge"
+            android:textAlignment="center"
+            android:layout_marginBottom="@dimen/spacing_lg" />
+
+        <!-- Privacy badge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_card_surface"
+            android:paddingHorizontal="@dimen/spacing_lg"
+            android:paddingVertical="@dimen/spacing_md"
+            android:gravity="start"
+            android:layout_marginBottom="@dimen/spacing_xxl">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_small"
+                android:layout_height="@dimen/icon_size_small"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/ic_verified_user"
+                app:tint="@color/md_theme_secondary"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/onboarding_improve_privacy_note"
+                android:textAppearance="@style/TextAppearance.PaySpeak.LabelMedium"
+                android:layout_marginStart="@dimen/spacing_md" />
+        </LinearLayout>
+
+        <!-- Anonymization visualization -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_xxl"
+            android:paddingVertical="@dimen/spacing_lg">
+
+            <!-- Mock SMS card 1 -->
+            <LinearLayout
+                android:layout_width="260dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_card_white"
+                android:padding="@dimen/spacing_md"
+                android:gravity="center_vertical"
+                android:elevation="2dp"
+                android:rotation="-1"
+                android:layout_gravity="start">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:src="@drawable/ic_sms"
+                    app:tint="@color/md_theme_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/spacing_md">
+
+                    <View
+                        android:layout_width="96dp"
+                        android:layout_height="6dp"
+                        android:background="@drawable/bg_dot_inactive"
+                        android:layout_marginBottom="6dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp"
+                        android:background="@drawable/bg_dot_inactive"
+                        android:alpha="0.5" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Mock SMS card 2 (anonymized) -->
+            <LinearLayout
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_card_white"
+                android:padding="@dimen/spacing_md"
+                android:gravity="center_vertical"
+                android:elevation="3dp"
+                android:rotation="2"
+                android:layout_gravity="end"
+                android:layout_marginTop="40dp">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:src="@drawable/ic_lock"
+                    app:tint="@color/md_theme_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/spacing_md">
+
+                    <!-- Masked dots -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="6dp">
+
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="6dp"
+                            android:background="@drawable/bg_dot_active"
+                            android:alpha="0.2"
+                            android:layout_marginEnd="4dp" />
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="6dp"
+                            android:background="@drawable/bg_dot_active"
+                            android:alpha="0.2"
+                            android:layout_marginEnd="4dp" />
+                        <View
+                            android:layout_width="12dp"
+                            android:layout_height="6dp"
+                            android:background="@drawable/bg_dot_active"
+                            android:alpha="0.2" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="80dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/bg_dot_active"
+                        android:alpha="0.1" />
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Toggle card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_card_white"
+            android:padding="@dimen/spacing_xl"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="@dimen/spacing_lg">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_improve_toggle_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_improve_toggle_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:layout_marginTop="@dimen/spacing_xs" />
+            </LinearLayout>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchImproveDetection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                style="@style/Widget.PaySpeak.Switch" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

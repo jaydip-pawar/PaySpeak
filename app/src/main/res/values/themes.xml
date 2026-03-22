@@ -21,6 +21,12 @@
         <item name="colorOnSurface">@color/md_theme_onSurface</item>
         <item name="colorSurfaceVariant">@color/md_theme_surfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/md_theme_onSurfaceVariant</item>
+        <!-- Surface container colors. -->
+        <item name="colorSurfaceContainerLowest">@color/md_theme_surfaceContainerLowest</item>
+        <item name="colorSurfaceContainerLow">@color/md_theme_surfaceContainerLow</item>
+        <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
         <!-- Error colors. -->
         <item name="colorError">@color/md_theme_error</item>
         <item name="colorOnError">@color/md_theme_onError</item>
@@ -28,8 +34,10 @@
         <item name="colorOnErrorContainer">@color/md_theme_onErrorContainer</item>
         <!-- Outline color. -->
         <item name="colorOutline">@color/md_theme_outline</item>
+        <item name="colorOutlineVariant">@color/md_theme_outlineVariant</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorSurface</item>
-        <!-- Customize your theme here. -->
+        <item name="android:statusBarColor">@color/md_theme_background</item>
+        <item name="android:navigationBarColor">@color/md_theme_background</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
     </style>
 </resources>

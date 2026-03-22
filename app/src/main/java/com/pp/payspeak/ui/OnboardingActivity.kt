@@ -1,25 +1,27 @@
 package com.pp.payspeak.ui
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
-import android.widget.Button
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.button.MaterialButton
 import com.pp.payspeak.R
 import com.pp.payspeak.services.PaymentAnnouncerService
+import com.pp.payspeak.ui.onboarding.OnboardingPagerAdapter
 import com.pp.payspeak.utils.PreferenceManager
 
 class OnboardingActivity : AppCompatActivity() {
+
     private lateinit var preferenceManager: PreferenceManager
-    private var currentStep = 0
-    private val totalSteps = 4
+    private lateinit var viewPager: ViewPager2
+    private lateinit var btnBack: ImageView
+    private lateinit var tvSkip: TextView
+    private lateinit var btnAction: MaterialButton
+    private lateinit var dots: List<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,109 +29,70 @@ class OnboardingActivity : AppCompatActivity() {
 
         preferenceManager = PreferenceManager(this)
 
-        setupUI()
+        initViews()
+        setupViewPager()
+        setupListeners()
+        updateDots(0)
     }
 
-    private fun setupUI() {
-        val titleText: TextView = findViewById(R.id.onboardingTitle)
-        val descriptionText: TextView = findViewById(R.id.onboardingDescription)
-        val actionButton: Button = findViewById(R.id.onboardingActionBtn)
-        val skipButton: Button = findViewById(R.id.onboardingSkipBtn)
+    private fun initViews() {
+        viewPager = findViewById(R.id.viewPager)
+        btnBack = findViewById(R.id.btnBack)
+        tvSkip = findViewById(R.id.tvSkip)
+        btnAction = findViewById(R.id.btnAction)
+        dots = listOf(
+            findViewById(R.id.dot0),
+            findViewById(R.id.dot1),
+            findViewById(R.id.dot2),
+            findViewById(R.id.dot3)
+        )
+    }
 
-        updateStepUI(titleText, descriptionText, actionButton)
+    private fun setupViewPager() {
+        viewPager.adapter = OnboardingPagerAdapter(this)
 
-        actionButton.setOnClickListener {
-            handleStepAction()
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateDots(position)
+                btnBack.visibility = if (position > 0) View.VISIBLE else View.GONE
+                btnAction.text = if (position == 3) getString(R.string.onboarding_get_started)
+                                 else getString(R.string.onboarding_continue)
+            }
+        })
+    }
+
+    private fun setupListeners() {
+        btnBack.setOnClickListener {
+            val current = viewPager.currentItem
+            if (current > 0) viewPager.currentItem = current - 1
         }
 
-        skipButton.setOnClickListener {
-            currentStep++
-            if (currentStep >= totalSteps) {
+        tvSkip.setOnClickListener { finishOnboarding() }
+
+        btnAction.setOnClickListener {
+            val current = viewPager.currentItem
+            if (current < 3) {
+                viewPager.currentItem = current + 1
+            } else {
                 finishOnboarding()
+            }
+        }
+    }
+
+    private fun updateDots(position: Int) {
+        val activeWidth = resources.getDimensionPixelSize(R.dimen.dot_active_width)
+        val inactiveWidth = resources.getDimensionPixelSize(R.dimen.dot_inactive_width)
+
+        dots.forEachIndexed { i, dot ->
+            val params = dot.layoutParams as LinearLayout.LayoutParams
+            if (i == position) {
+                params.width = activeWidth
+                dot.setBackgroundResource(R.drawable.bg_dot_active)
             } else {
-                updateStepUI(titleText, descriptionText, actionButton)
+                params.width = inactiveWidth
+                dot.setBackgroundResource(R.drawable.bg_dot_inactive)
             }
-        }
-    }
-
-    private fun updateStepUI(title: TextView, description: TextView, action: Button) {
-        when (currentStep) {
-            0 -> {
-                title.text = "Welcome to PaySpeak"
-                description.text = "PaySpeak announces your payment transactions in your preferred language. Let's set up the required permissions."
-                action.text = "Get Started"
-            }
-            1 -> {
-                title.text = "Notification Access"
-                description.text = "PaySpeak needs notification access to detect payment notifications from apps like Paytm, Google Pay, PhonePe, etc."
-                action.text = "Enable Notification Access"
-            }
-            2 -> {
-                title.text = "Accessibility Service"
-                description.text = "The accessibility service helps detect payment information from apps more reliably."
-                action.text = "Enable Accessibility"
-            }
-            3 -> {
-                title.text = "SMS Permission"
-                description.text = "Allow SMS permission to detect bank transaction messages."
-                action.text = "Grant SMS Permission"
-            }
-        }
-    }
-
-    private fun handleStepAction() {
-        val titleText: TextView = findViewById(R.id.onboardingTitle)
-        val descriptionText: TextView = findViewById(R.id.onboardingDescription)
-        val actionButton: Button = findViewById(R.id.onboardingActionBtn)
-
-        when (currentStep) {
-            0 -> {
-                currentStep++
-                updateStepUI(titleText, descriptionText, actionButton)
-            }
-            1 -> {
-                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                currentStep++
-                updateStepUI(titleText, descriptionText, actionButton)
-            }
-            2 -> {
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                currentStep++
-                updateStepUI(titleText, descriptionText, actionButton)
-            }
-            3 -> {
-                requestSmsPermission()
-            }
-        }
-    }
-
-    private fun requestSmsPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-            // PERM-01: POST_NOTIFICATIONS is a runtime permission on Android 13+ (API 33).
-            // Without it, the foreground "PaySpeak is running" notification is silently
-            // suppressed — user has no indicator the service is active.
-            val permissions = mutableListOf(
-                Manifest.permission.RECEIVE_SMS,
-                Manifest.permission.READ_SMS
-            )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-            }
-            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 100)
-        } else {
-            finishOnboarding()
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 100) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "SMS permission granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "SMS permission denied - you can enable it later", Toast.LENGTH_SHORT).show()
-            }
-            finishOnboarding()
+            dot.layoutParams = params
         }
     }
 

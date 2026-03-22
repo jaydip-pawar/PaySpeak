@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing -->
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">20dp</dimen>
+    <dimen name="spacing_xxl">24dp</dimen>
+    <dimen name="spacing_xxxl">32dp</dimen>
+
+    <!-- Radius -->
+    <dimen name="radius_small">8dp</dimen>
+    <dimen name="radius_card">12dp</dimen>
+    <dimen name="radius_button">12dp</dimen>
+    <dimen name="radius_large">16dp</dimen>
+    <dimen name="radius_xlarge">32dp</dimen>
+
+    <!-- Components -->
+    <dimen name="button_height">56dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="icon_container_size">48dp</dimen>
+    <dimen name="icon_container_small">40dp</dimen>
+    <dimen name="icon_size_medium">24dp</dimen>
+    <dimen name="icon_size_small">20dp</dimen>
+
+    <!-- Onboarding -->
+    <dimen name="onboarding_horizontal_padding">24dp</dimen>
+    <dimen name="onboarding_illustration_size">200dp</dimen>
+    <dimen name="onboarding_illustration_inner">120dp</dimen>
+    <dimen name="onboarding_illustration_icon">48dp</dimen>
+    <dimen name="dot_active_width">28dp</dimen>
+    <dimen name="dot_inactive_width">8dp</dimen>
+    <dimen name="dot_height">6dp</dimen>
+</resources>

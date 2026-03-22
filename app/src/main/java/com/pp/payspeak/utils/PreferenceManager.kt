@@ -13,6 +13,7 @@ class PreferenceManager(context: Context) {
         private const val KEY_TTS_PITCH = "tts_pitch"
         private const val KEY_VOICE_VOLUME = "voice_volume"
         private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
+        private const val KEY_IMPROVE_DETECTION = "improve_detection"
     }
 
     fun getLanguage(): Language {
@@ -35,6 +36,9 @@ class PreferenceManager(context: Context) {
 
     fun isOnboardingCompleted(): Boolean = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
     fun setOnboardingCompleted(completed: Boolean) { prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, completed).apply() }
+
+    fun isImproveDetectionEnabled(): Boolean = prefs.getBoolean(KEY_IMPROVE_DETECTION, true)
+    fun setImproveDetectionEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_IMPROVE_DETECTION, enabled).apply() }
 
     fun clearAll() { prefs.edit().clear().apply() }
 }

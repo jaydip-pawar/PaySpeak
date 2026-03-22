@@ -1,55 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
+    android:background="@color/md_theme_background"
+    android:fitsSystemWindows="true"
     tools:context=".ui.OnboardingActivity">
 
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@mipmap/ic_launcher"
-        android:layout_marginBottom="32dp"/>
-
-    <TextView
-        android:id="@+id/onboardingTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome to PaySpeak"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textAlignment="center"
-        android:layout_marginBottom="16dp"/>
-
-    <TextView
-        android:id="@+id/onboardingDescription"
+    <!-- Top Bar -->
+    <LinearLayout
+        android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="PaySpeak announces your payment transactions in your preferred language."
-        android:textSize="16sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textAlignment="center"
-        android:lineSpacingMultiplier="1.4"
-        android:layout_marginBottom="48dp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/spacing_lg"
+        android:paddingVertical="@dimen/spacing_lg">
 
-    <Button
-        android:id="@+id/onboardingActionBtn"
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/md_theme_secondary"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_onSurface" />
+
+        <TextView
+            android:id="@+id/tvSkip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_skip"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_onPrimaryContainer"
+            android:padding="@dimen/spacing_sm"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+    </LinearLayout>
+
+    <!-- ViewPager fills remaining space -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Bottom Bar: Progress dots + CTA button -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Get Started"
-        android:textSize="16sp"
-        android:layout_marginBottom="16dp"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingHorizontal="@dimen/onboarding_horizontal_padding"
+        android:paddingTop="@dimen/spacing_lg"
+        android:paddingBottom="@dimen/spacing_xxxl"
+        android:background="@color/md_theme_background">
 
-    <Button
-        android:id="@+id/onboardingSkipBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Skip"
-        style="@style/Widget.Material3.Button.TextButton"/>
+        <!-- Progress Dots -->
+        <LinearLayout
+            android:id="@+id/dotsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/spacing_xl">
 
+            <View
+                android:id="@+id/dot0"
+                android:layout_width="@dimen/dot_active_width"
+                android:layout_height="@dimen/dot_height"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_dot_active" />
+
+            <View
+                android:id="@+id/dot1"
+                android:layout_width="@dimen/dot_inactive_width"
+                android:layout_height="@dimen/dot_height"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_dot_inactive" />
+
+            <View
+                android:id="@+id/dot2"
+                android:layout_width="@dimen/dot_inactive_width"
+                android:layout_height="@dimen/dot_height"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_dot_inactive" />
+
+            <View
+                android:id="@+id/dot3"
+                android:layout_width="@dimen/dot_inactive_width"
+                android:layout_height="@dimen/dot_height"
+                android:background="@drawable/bg_dot_inactive" />
+        </LinearLayout>
+
+        <!-- CTA Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAction"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:text="@string/onboarding_continue"
+            style="@style/Widget.PaySpeak.Button.Primary" />
+    </LinearLayout>
 </LinearLayout>
-

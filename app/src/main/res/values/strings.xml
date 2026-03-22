@@ -5,4 +5,44 @@
     <string name="notification_channel_description">Notifications for payment announcements</string>
     <string name="service_listening">Listening for payments…</string>
     <string name="accessibility_service_description">PaySpeak uses accessibility service to detect payment notifications from apps like Paytm, Google Pay, PhonePe, and bank apps to announce payment amounts.</string>
+
+    <!-- Onboarding - Common -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="back">Back</string>
+
+    <!-- Onboarding - Screen 1: Core Value -->
+    <string name="onboarding_core_value_title">Hear every payment instantly</string>
+    <string name="onboarding_core_value_highlight">instantly</string>
+    <string name="onboarding_core_value_description">PaySpeak announces incoming payments out loud, so you never miss a payment while working, driving, or serving customers.</string>
+
+    <!-- Onboarding - Screen 2: How it Works -->
+    <string name="onboarding_how_it_works_title">Smart payment detection</string>
+    <string name="onboarding_how_it_works_description">PaySpeak can detect payments from notifications, bank SMS, and accessibility events for better reliability.</string>
+    <string name="onboarding_how_it_works_hint">Enable only the methods you want. Notifications are recommended for the fastest detection.</string>
+    <string name="onboarding_method_notifications">Notifications</string>
+    <string name="onboarding_method_notifications_desc">Fastest and recommended</string>
+    <string name="onboarding_method_sms">SMS</string>
+    <string name="onboarding_method_sms_desc">Detects bank transaction messages</string>
+    <string name="onboarding_method_accessibility">Accessibility</string>
+    <string name="onboarding_method_accessibility_desc">Adds extra support for some apps</string>
+
+    <!-- Onboarding - Screen 3: Privacy -->
+    <string name="onboarding_privacy_title">Your data stays on your device</string>
+    <string name="onboarding_privacy_description">PaySpeak processes payment detection locally on your phone. Your transaction history stays on your device.</string>
+    <string name="onboarding_privacy_info">You stay in control of which permissions to enable.</string>
+    <string name="onboarding_privacy_no_login_title">No login required</string>
+    <string name="onboarding_privacy_no_login_desc">Access all core features without creating an account or sharing email.</string>
+    <string name="onboarding_privacy_permissions_title">Permissions are optional</string>
+    <string name="onboarding_privacy_permissions_desc">Enable only what you need. We respect your choice for complete anonymity.</string>
+    <string name="onboarding_privacy_notifications_title">Works with just notifications</string>
+    <string name="onboarding_privacy_notifications_desc">Privacy-first monitoring through system notifications only.</string>
+
+    <!-- Onboarding - Screen 4: Improve Detection -->
+    <string name="onboarding_improve_title">Help improve payment detection</string>
+    <string name="onboarding_improve_description">If a payment message cannot be recognized properly, PaySpeak can share an anonymized example to help improve detection accuracy.</string>
+    <string name="onboarding_improve_privacy_note">Sensitive numbers and identifiers are masked before sharing.</string>
+    <string name="onboarding_improve_toggle_title">Improve detection</string>
+    <string name="onboarding_improve_toggle_desc">Help improve detection for future updates.</string>
 </resources>
