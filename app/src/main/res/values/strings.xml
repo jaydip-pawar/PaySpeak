@@ -19,8 +19,10 @@
 
     <!-- Onboarding - Screen 2: How it Works -->
     <string name="onboarding_how_it_works_title">Smart payment detection</string>
-    <string name="onboarding_how_it_works_description">PaySpeak can detect payments from notifications, bank SMS, and accessibility events for better reliability.</string>
-    <string name="onboarding_how_it_works_hint">Enable only the methods you want. Notifications are recommended for the fastest detection.</string>
+    <string name="onboarding_how_it_works_description">PaySpeak can detect payments from notifications, bank SMS, and accessibility support for better reliability.</string>
+    <string name="onboarding_how_it_works_hint">All permissions are optional. Notifications are recommended for the fastest detection, while SMS adds extra reliability.</string>
+    <string name="onboarding_badge_recommended">Recommended</string>
+    <string name="onboarding_badge_optional">Optional</string>
     <string name="onboarding_method_notifications">Notifications</string>
     <string name="onboarding_method_notifications_desc">Fastest and recommended</string>
     <string name="onboarding_method_sms">SMS</string>
@@ -29,20 +31,20 @@
     <string name="onboarding_method_accessibility_desc">Adds extra support for some apps</string>
 
     <!-- Onboarding - Screen 3: Privacy -->
-    <string name="onboarding_privacy_title">Your data stays on your device</string>
+    <string name="onboarding_privacy_title">Private, simple, and in your control</string>
     <string name="onboarding_privacy_description">PaySpeak processes payment detection locally on your phone. Your transaction history stays on your device.</string>
     <string name="onboarding_privacy_info">You stay in control of which permissions to enable.</string>
     <string name="onboarding_privacy_no_login_title">No login required</string>
     <string name="onboarding_privacy_no_login_desc">Access all core features without creating an account or sharing email.</string>
     <string name="onboarding_privacy_permissions_title">Permissions are optional</string>
-    <string name="onboarding_privacy_permissions_desc">Enable only what you need. We respect your choice for complete anonymity.</string>
+    <string name="onboarding_privacy_permissions_desc">Enable only what you need. We respect the choices you make.</string>
     <string name="onboarding_privacy_notifications_title">Works with just notifications</string>
     <string name="onboarding_privacy_notifications_desc">Privacy-first monitoring through system notifications only.</string>
 
     <!-- Onboarding - Screen 4: Improve Detection -->
     <string name="onboarding_improve_title">Help improve payment detection</string>
-    <string name="onboarding_improve_description">If a payment message cannot be recognized properly, PaySpeak can share an anonymized example to help improve detection accuracy.</string>
+    <string name="onboarding_improve_description">If a payment cannot be recognized properly, PaySpeak can share an anonymized example to help improve detection accuracy.</string>
     <string name="onboarding_improve_privacy_note">Sensitive numbers and identifiers are masked before sharing.</string>
     <string name="onboarding_improve_toggle_title">Improve detection</string>
-    <string name="onboarding_improve_toggle_desc">Help improve detection for future updates.</string>
+    <string name="onboarding_improve_toggle_desc">Help improve payment detection in future updates.</string>
 </resources>
