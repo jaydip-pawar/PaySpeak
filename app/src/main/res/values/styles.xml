@@ -49,8 +49,8 @@
 
     <!-- Button Styles -->
     <style name="Widget.PaySpeak.Button.Primary" parent="Widget.Material3.Button">
-        <item name="android:textColor">@color/md_theme_onSecondary</item>
-        <item name="backgroundTint">@color/md_theme_secondary</item>
+        <item name="android:textColor">@color/btn_primary_text_tint</item>
+        <item name="backgroundTint">@color/btn_primary_bg_tint</item>
         <item name="cornerRadius">@dimen/radius_button</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">bold</item>

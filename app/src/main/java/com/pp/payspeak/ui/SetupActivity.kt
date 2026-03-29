@@ -39,6 +39,7 @@ class SetupActivity : AppCompatActivity() {
     private lateinit var btnSetupLater: Button
     private lateinit var tvSetupProgress: TextView
     private lateinit var llScrollContent: LinearLayout
+    private lateinit var llFooterButtons: LinearLayout
 
     private val totalPermissions = 5
     private var expandedCardIndex = 0
@@ -101,6 +102,7 @@ class SetupActivity : AppCompatActivity() {
         btnBackground = findViewById(R.id.btnBackground)
         btnContinueHome = findViewById(R.id.btnContinueHome)
         btnSetupLater = findViewById(R.id.btnSetupLater)
+        llFooterButtons = findViewById(R.id.llFooterButtons)
         tvSetupProgress = findViewById(R.id.tvSetupProgress)
         llScrollContent = findViewById(R.id.llScrollContent)
     }
@@ -222,8 +224,8 @@ class SetupActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
         btnBackground.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = android.net.Uri.fromParts("package", packageName, null)
+            startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = android.net.Uri.parse("package:$packageName")
             })
         }
         btnContinueHome.setOnClickListener { finishSetup() }
@@ -234,8 +236,14 @@ class SetupActivity : AppCompatActivity() {
         var reorderNeeded = false
 
         cards.forEach { cardInfo ->
-            if (cardInfo.isGranted() && cardInfo.card.tag != "granted") {
+            val isGrantedNow = cardInfo.isGranted()
+            val wasGranted = cardInfo.card.tag == "granted"
+
+            if (isGrantedNow && !wasGranted) {
                 collapseCardToGranted(cardInfo)
+                reorderNeeded = true
+            } else if (!isGrantedNow && wasGranted) {
+                resetCardToUngranted(cardInfo)
                 reorderNeeded = true
             }
         }
@@ -258,10 +266,21 @@ class SetupActivity : AppCompatActivity() {
     private fun collapseCardToGranted(cardInfo: CardInfo) {
         // Apply granted ConstraintSet: title stays inline, badge gone, check appears
         cardInfo.grantedSet.applyTo(cardInfo.card)
-        // Change icon background to green
-        cardInfo.iconFrame.setBackgroundResource(R.drawable.bg_badge_recommended)
+        // Shrink padding to make granted cards more compact
+        val smallPadding = resources.getDimensionPixelSize(R.dimen.spacing_md)
+        cardInfo.card.setPadding(smallPadding, smallPadding, smallPadding, smallPadding)
         cardInfo.card.tag = "granted"
         cardInfo.card.isClickable = false
+    }
+
+    private fun resetCardToUngranted(cardInfo: CardInfo) {
+        // Apply collapsed ConstraintSet to reset state
+        cardInfo.collapsedSet.applyTo(cardInfo.card)
+        // Restore standard padding
+        val defaultPadding = resources.getDimensionPixelSize(R.dimen.spacing_lg)
+        cardInfo.card.setPadding(defaultPadding, defaultPadding, defaultPadding, defaultPadding)
+        cardInfo.card.tag = null
+        cardInfo.card.isClickable = true
     }
 
     private fun reorderCards() {
@@ -281,6 +300,27 @@ class SetupActivity : AppCompatActivity() {
     private fun updateProgress() {
         val granted = cards.count { it.isGranted() }
         tvSetupProgress.text = getString(R.string.setup_progress, granted, totalPermissions)
+
+        // Animate footer buttons transition
+        TransitionManager.beginDelayedTransition(
+            llFooterButtons,
+            android.transition.AutoTransition().apply { duration = 300 }
+        )
+
+        when (granted) {
+            0 -> {
+                btnContinueHome.isEnabled = false
+                btnSetupLater.visibility = View.VISIBLE
+            }
+            totalPermissions -> {
+                btnContinueHome.isEnabled = true
+                btnSetupLater.visibility = View.GONE
+            }
+            else -> {
+                btnContinueHome.isEnabled = true
+                btnSetupLater.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun finishSetup() {
@@ -313,14 +353,7 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun isBatteryOptimizationDisabled(): Boolean {
-        // Check both the explicit exemption list AND whether the service is already running.
-        // "Allow background usage" in device settings doesn't necessarily set isIgnoringBatteryOptimizations,
-        // but if the service is alive the user has already granted what we need.
         val pm = getSystemService(android.os.PowerManager::class.java)
-        if (pm.isIgnoringBatteryOptimizations(packageName)) return true
-        val manager = getSystemService(android.app.ActivityManager::class.java)
-        return manager.getRunningServices(Int.MAX_VALUE).any {
-            it.service.className == com.pp.payspeak.services.PaymentAnnouncerService::class.java.name
-        }
+        return pm.isIgnoringBatteryOptimizations(packageName)
     }
 }

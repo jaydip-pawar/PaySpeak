@@ -616,6 +616,7 @@
 
         <!-- Buttons Row -->
         <LinearLayout
+            android:id="@+id/llFooterButtons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
