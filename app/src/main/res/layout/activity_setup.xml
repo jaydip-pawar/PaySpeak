@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_theme_background">
+
+    <!-- Top App Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/md_theme_background"
+        android:fitsSystemWindows="true"
+        app:elevation="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/spacing_lg"
+            android:paddingVertical="@dimen/spacing_lg">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_title"
+                android:textAppearance="@style/TextAppearance.PaySpeak.HeadlineMedium"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Scrollable Content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:paddingBottom="140dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:id="@+id/llScrollContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/onboarding_horizontal_padding"
+            android:paddingTop="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_lg">
+
+            <!-- Description -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_description"
+                android:textAppearance="@style/TextAppearance.PaySpeak.BodyLarge"
+                android:layout_marginBottom="@dimen/spacing_xxl" />
+
+            <!-- Tip Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_card_surface_high"
+                android:paddingHorizontal="@dimen/spacing_lg"
+                android:paddingVertical="@dimen/spacing_md"
+                android:gravity="start"
+                android:layout_marginBottom="@dimen/spacing_xxl">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/md_theme_onSurfaceVariant"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/setup_tip"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelMedium"
+                    android:layout_marginStart="@dimen/spacing_md" />
+            </LinearLayout>
+
+            <!-- Card 1: Notification Access -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardNotificationAccess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_surface"
+                android:padding="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_md">
+
+                <FrameLayout
+                    android:id="@+id/iconFrameNotificationAccess"
+                    android:layout_width="@dimen/icon_container_size"
+                    android:layout_height="@dimen/icon_container_size"
+                    android:background="@drawable/bg_icon_rounded_white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <ImageView
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_notifications_active"
+                        app:tint="@color/md_theme_secondary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvBadgeNotificationAccess"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_badge_recommended"
+                    android:textAllCaps="true"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingHorizontal="@dimen/spacing_md"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:background="@drawable/bg_badge_recommended"
+                    android:textColor="@color/md_theme_onSecondaryContainer"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameNotificationAccess"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameNotificationAccess"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivCheckNotificationAccess"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/md_theme_secondary"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameNotificationAccess"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameNotificationAccess"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <!-- Collapsed default: title inline with icon; expanded: below icon via ConstraintSet -->
+                <TextView
+                    android:id="@+id/tvTitleNotificationAccess"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_notification_access_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    app:layout_constraintStart_toEndOf="@id/iconFrameNotificationAccess"
+                    app:layout_constraintEnd_toStartOf="@id/tvBadgeNotificationAccess"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameNotificationAccess"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameNotificationAccess" />
+
+                <TextView
+                    android:id="@+id/tvDescNotificationAccess"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_notification_access_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleNotificationAccess"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnNotificationAccess"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:visibility="gone"
+                    android:text="@string/setup_btn_allow"
+                    android:textColor="@color/md_theme_onSecondary"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:backgroundTint="@color/md_theme_secondary"
+                    app:cornerRadius="@dimen/radius_card"
+                    android:stateListAnimator="@null"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescNotificationAccess"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Card 2: Allow PaySpeak Notifications -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardPostNotifications"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_surface"
+                android:padding="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_md">
+
+                <FrameLayout
+                    android:id="@+id/iconFramePostNotifications"
+                    android:layout_width="@dimen/icon_container_size"
+                    android:layout_height="@dimen/icon_container_size"
+                    android:background="@drawable/bg_icon_rounded_white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <ImageView
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_app_registration"
+                        app:tint="@color/md_theme_secondary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvBadgePostNotifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_badge_recommended"
+                    android:textAllCaps="true"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingHorizontal="@dimen/spacing_md"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:background="@drawable/bg_badge_recommended"
+                    android:textColor="@color/md_theme_onSecondaryContainer"
+                    app:layout_constraintTop_toTopOf="@id/iconFramePostNotifications"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFramePostNotifications"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivCheckPostNotifications"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/md_theme_secondary"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="@id/iconFramePostNotifications"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFramePostNotifications"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTitlePostNotifications"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_post_notifications_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    app:layout_constraintStart_toEndOf="@id/iconFramePostNotifications"
+                    app:layout_constraintEnd_toStartOf="@id/tvBadgePostNotifications"
+                    app:layout_constraintTop_toTopOf="@id/iconFramePostNotifications"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFramePostNotifications" />
+
+                <TextView
+                    android:id="@+id/tvDescPostNotifications"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_post_notifications_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitlePostNotifications"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPostNotifications"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:visibility="gone"
+                    android:text="@string/setup_btn_enable"
+                    android:textColor="@color/md_theme_onSecondary"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:backgroundTint="@color/md_theme_secondary"
+                    app:cornerRadius="@dimen/radius_card"
+                    android:stateListAnimator="@null"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescPostNotifications"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Card 3: SMS Access -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardSmsAccess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_surface"
+                android:padding="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_md">
+
+                <FrameLayout
+                    android:id="@+id/iconFrameSmsAccess"
+                    android:layout_width="@dimen/icon_container_size"
+                    android:layout_height="@dimen/icon_container_size"
+                    android:background="@drawable/bg_icon_rounded_white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <ImageView
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_sms"
+                        app:tint="@color/md_theme_secondary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvBadgeSmsAccess"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_badge_optional"
+                    android:textAllCaps="true"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingHorizontal="@dimen/spacing_md"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:background="@drawable/bg_badge_optional"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameSmsAccess"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameSmsAccess"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivCheckSmsAccess"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/md_theme_secondary"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameSmsAccess"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameSmsAccess"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTitleSmsAccess"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_sms_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    app:layout_constraintStart_toEndOf="@id/iconFrameSmsAccess"
+                    app:layout_constraintEnd_toStartOf="@id/tvBadgeSmsAccess"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameSmsAccess"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameSmsAccess" />
+
+                <TextView
+                    android:id="@+id/tvDescSmsAccess"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_sms_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleSmsAccess"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSmsAccess"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:visibility="gone"
+                    android:text="@string/setup_btn_enable"
+                    android:textColor="@color/md_theme_onSecondary"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:backgroundTint="@color/md_theme_secondary"
+                    app:cornerRadius="@dimen/radius_card"
+                    android:stateListAnimator="@null"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescSmsAccess"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Card 4: Accessibility Access -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardAccessibility"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_surface"
+                android:padding="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_md">
+
+                <FrameLayout
+                    android:id="@+id/iconFrameAccessibility"
+                    android:layout_width="@dimen/icon_container_size"
+                    android:layout_height="@dimen/icon_container_size"
+                    android:background="@drawable/bg_icon_rounded_white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <ImageView
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_accessibility"
+                        app:tint="@color/md_theme_secondary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvBadgeAccessibility"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_badge_optional"
+                    android:textAllCaps="true"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingHorizontal="@dimen/spacing_md"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:background="@drawable/bg_badge_optional"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameAccessibility"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameAccessibility"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivCheckAccessibility"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/md_theme_secondary"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameAccessibility"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameAccessibility"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTitleAccessibility"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_accessibility_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    app:layout_constraintStart_toEndOf="@id/iconFrameAccessibility"
+                    app:layout_constraintEnd_toStartOf="@id/tvBadgeAccessibility"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameAccessibility"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameAccessibility" />
+
+                <TextView
+                    android:id="@+id/tvDescAccessibility"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_accessibility_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleAccessibility"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAccessibility"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:visibility="gone"
+                    android:text="@string/setup_btn_enable"
+                    android:textColor="@color/md_theme_onSecondary"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:backgroundTint="@color/md_theme_secondary"
+                    app:cornerRadius="@dimen/radius_card"
+                    android:stateListAnimator="@null"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescAccessibility"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Card 5: Background Activity -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardBackground"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_surface"
+                android:padding="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_md">
+
+                <FrameLayout
+                    android:id="@+id/iconFrameBackground"
+                    android:layout_width="@dimen/icon_container_size"
+                    android:layout_height="@dimen/icon_container_size"
+                    android:background="@drawable/bg_icon_rounded_white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <ImageView
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_bolt"
+                        app:tint="@color/md_theme_secondary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvBadgeBackground"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_badge_reliability"
+                    android:textAllCaps="true"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingHorizontal="@dimen/spacing_md"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:background="@drawable/bg_badge_optional"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameBackground"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivCheckBackground"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/md_theme_secondary"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameBackground"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTitleBackground"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_background_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    app:layout_constraintStart_toEndOf="@id/iconFrameBackground"
+                    app:layout_constraintEnd_toStartOf="@id/tvBadgeBackground"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameBackground" />
+
+                <TextView
+                    android:id="@+id/tvDescBackground"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_background_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleBackground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnBackground"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:visibility="gone"
+                    android:text="@string/setup_btn_enable"
+                    android:textColor="@color/md_theme_onSecondary"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:backgroundTint="@color/md_theme_secondary"
+                    app:cornerRadius="@dimen/radius_card"
+                    android:stateListAnimator="@null"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescBackground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Footer note -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_footer_note"
+                android:textAppearance="@style/TextAppearance.PaySpeak.LabelSmall"
+                android:textAlignment="center"
+                android:layout_marginTop="@dimen/spacing_lg" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:background="@color/md_theme_surfaceContainerLowest"
+        android:elevation="4dp">
+
+        <!-- Progress Section -->
+        <TextView
+            android:id="@+id/tvSetupProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/onboarding_horizontal_padding"
+            android:paddingVertical="@dimen/spacing_md"
+            android:textAppearance="@style/TextAppearance.PaySpeak.LabelSmall"
+            android:textAllCaps="true"
+            android:letterSpacing="0.1"
+            android:textColor="@color/md_theme_onSurfaceVariant" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/md_theme_outlineVariant" />
+
+        <!-- Buttons Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/onboarding_horizontal_padding"
+            android:paddingTop="@dimen/spacing_lg"
+            android:paddingBottom="@dimen/spacing_xxl">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnContinueHome"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_weight="1"
+                android:text="@string/setup_continue_home"
+                android:textAllCaps="false"
+                app:icon="@drawable/ic_home"
+                app:iconGravity="textStart"
+                app:iconPadding="@dimen/spacing_sm"
+                style="@style/Widget.PaySpeak.Button.Primary" />
+
+            <Button
+                android:id="@+id/btnSetupLater"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/setup_later"
+                android:textColor="@color/md_theme_onSurface"
+                android:textSize="14sp"
+                android:textAllCaps="false"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null"
+                android:layout_marginStart="@dimen/spacing_sm" />
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

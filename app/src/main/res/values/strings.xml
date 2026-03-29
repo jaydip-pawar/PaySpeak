@@ -47,4 +47,29 @@
     <string name="onboarding_improve_privacy_note">Sensitive numbers and identifiers are masked before sharing.</string>
     <string name="onboarding_improve_toggle_title">Improve detection</string>
     <string name="onboarding_improve_toggle_desc">Help improve payment detection in future updates.</string>
+
+    <!-- Setup Screen -->
+    <string name="setup_title">Set up PaySpeak</string>
+    <string name="setup_description">Choose how PaySpeak detects and announces payments. Enable only what you need.</string>
+    <string name="setup_tip">You can start with just notifications and add more later.</string>
+    <string name="setup_notification_access_title">Notification access</string>
+    <string name="setup_notification_access_desc">Detect payments from apps like GPay, PhonePe, and Paytm automatically.</string>
+    <string name="setup_post_notifications_title">Allow PaySpeak notifications</string>
+    <string name="setup_post_notifications_desc">Receive important alerts and voice announcement updates.</string>
+    <string name="setup_sms_title">SMS access</string>
+    <string name="setup_sms_desc">Read bank SMS to detect payments when notifications are missed.</string>
+    <string name="setup_accessibility_title">Accessibility access</string>
+    <string name="setup_accessibility_desc">Adds support for detecting payments in apps that don\'t send clear notifications.</string>
+    <string name="setup_background_title">Allow background activity</string>
+    <string name="setup_background_desc">Keeps announcements working even when your phone is idle or screen is off.</string>
+    <string name="setup_badge_recommended">Recommended</string>
+    <string name="setup_badge_optional">Optional</string>
+    <string name="setup_badge_reliability">Reliability</string>
+    <string name="setup_btn_allow">Allow</string>
+    <string name="setup_btn_enable">Enable</string>
+    <string name="setup_btn_granted">Granted</string>
+    <string name="setup_continue_home">Continue to Home</string>
+    <string name="setup_later">Set up later</string>
+    <string name="setup_footer_note">You can change these anytime in Settings.</string>
+    <string name="setup_progress">Setup progress: %1$d of %2$d enabled</string>
 </resources>

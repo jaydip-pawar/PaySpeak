@@ -44,6 +44,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        if (!preferenceManager.isSetupCompleted()) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

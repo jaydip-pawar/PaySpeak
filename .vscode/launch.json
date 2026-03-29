@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Android App (via Task)",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "echo",
+            "runtimeArgs": ["Launching via preLaunchTask..."],
+            "preLaunchTask": "Build and Run Android App",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Debug Android App (Requires 'Android for VS Code' extension)",
+            "type": "android",
+            "request": "launch",
+            "appSrcRoot": "${workspaceRoot}/app/src/main",
+            "apkFile": "${workspaceRoot}/app/build/outputs/apk/debug/app-debug.apk",
+            "adbPort": 5037
+        }
+    ]
+}

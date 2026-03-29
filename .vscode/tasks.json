@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "options": {
+        "env": {
+            "JAVA_HOME": "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+        }
+    },
+    "tasks": [
+        {
+            "label": "Build and Run Android App",
+            "type": "shell",
+            "command": "./gradlew installDebug && ~/Library/Android/sdk/platform-tools/adb shell am start -n com.pp.payspeak/.ui.MainActivity",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            },
+            "problemMatcher": [],
+            "detail": "Builds the debug APK, installs it on the emulator using adb, and launches the main activity."
+        },
+        {
+            "label": "Clean Project",
+            "type": "shell",
+            "command": "./gradlew clean",
+            "group": "build"
+        },
+        {
+            "label": "View Logcat",
+            "type": "shell",
+            "command": "~/Library/Android/sdk/platform-tools/adb logcat --pid=$(~/Library/Android/sdk/platform-tools/adb shell pidof -s com.pp.payspeak)",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

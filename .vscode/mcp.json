@@ -1,10 +1,10 @@
 {
   "servers": {
     "stitch": {
-      "type": "http",
-      "url": "https://stitch.googleapis.com/mcp",
-      "headers": {
-        "X-Goog-Api-Key": "AQ.Ab8RN6Ifo6VnsWxLqEFNEGWIF8MT82iXVyXKc1s_BvDsZJHf3w"
+      "command": "npx",
+      "args": ["-y", "stitch-mcp"],
+      "env": {
+        "GOOGLE_CLOUD_PROJECT": "payspeak-491114"
       }
     }
   }

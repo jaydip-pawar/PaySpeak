@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
 import com.pp.payspeak.R
-import com.pp.payspeak.services.PaymentAnnouncerService
 import com.pp.payspeak.ui.onboarding.OnboardingPagerAdapter
 import com.pp.payspeak.utils.PreferenceManager
 
@@ -98,8 +97,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun finishOnboarding() {
         preferenceManager.setOnboardingCompleted(true)
-        startForegroundService(Intent(this, PaymentAnnouncerService::class.java))
-        startActivity(Intent(this, MainActivity::class.java))
+        startActivity(Intent(this, SetupActivity::class.java))
         finish()
     }
 }
