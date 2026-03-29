@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/md_theme_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="20dp">
+
+        <!-- ══════════════════════════ STATUS CARD ══════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/cardStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_status_card_subtle"
+            android:paddingTop="10dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:layout_marginBottom="0dp">
+
+            <!-- Title row: animated dot + text -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="start|center_vertical"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:layout_marginBottom="0dp">
+
+                <!-- Pulse animation container -->
+                <FrameLayout
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="6dp"
+                    android:clipChildren="false">
+
+                    <!-- Outer ripple (animated) -->
+                    <View
+                        android:id="@+id/vPulseRipple"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_pulse_ripple" />
+
+                    <!-- Inner solid dot -->
+                    <View
+                        android:id="@+id/vPulseDot"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_dot_active" />
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvStatusTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_status_listening"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_onBackground" />
+
+            </LinearLayout>
+
+            <!-- Subtitle -->
+            <TextView
+                android:id="@+id/tvStatusSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:layout_marginBottom="0dp"
+                android:text="@string/home_status_subtitle_all_active"
+                android:textSize="12sp"
+                android:textColor="@color/md_theme_statusSubtitle" />
+            <!-- Subtle activity feedback, only if not cluttered -->
+            <TextView
+                android:id="@+id/tvStatusListeningFeedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:layout_marginBottom="4dp"
+                android:text="@string/home_status_listening_feedback"
+                android:textSize="11sp"
+                android:textColor="@color/md_theme_statusMuted"
+                android:visibility="gone" />
+
+            <!-- Permission chips row -->
+            <LinearLayout
+                android:id="@+id/llPermissionChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="0dp">
+
+                <!-- Notification chip -->
+                <LinearLayout
+                    android:id="@+id/chipNotification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_primary"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:layout_marginEnd="8dp">
+
+                    <ImageView
+                        android:id="@+id/ivChipNotifIcon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="5dp"
+                        android:src="@drawable/ic_notifications_active"
+                        app:tint="@color/md_theme_secondary" />
+
+                    <TextView
+                        android:id="@+id/tvChipNotif"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_chip_notifications"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_onBackground" />
+
+                </LinearLayout>
+
+                <!-- SMS chip -->
+                <LinearLayout
+                    android:id="@+id/chipSms"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_soft"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:layout_marginEnd="8dp">
+
+                    <ImageView
+                        android:id="@+id/ivChipSmsIcon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="5dp"
+                        android:src="@drawable/ic_sms"
+                        app:tint="@color/md_theme_secondary" />
+
+                    <TextView
+                        android:id="@+id/tvChipSms"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_chip_sms"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_onBackground" />
+
+                </LinearLayout>
+
+                <!-- Accessibility chip -->
+                <LinearLayout
+                    android:id="@+id/chipAccessibility"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_soft"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+
+                    <ImageView
+                        android:id="@+id/ivChipAccessIcon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginEnd="5dp"
+                        android:src="@drawable/ic_accessibility"
+                        app:tint="@color/md_theme_secondary" />
+
+                    <TextView
+                        android:id="@+id/tvChipAccessibility"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home_chip_accessibility"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_onBackground" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ══════════════════════════ ACTION REQUIRED HEADER ══════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/llActionRequired"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="6dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_action_required"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_outline"
+                    android:letterSpacing="0.1" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/home_action_required_hint"
+                android:textSize="10sp"
+                android:textColor="@color/md_theme_onSurfaceVariant" />
+
+        </LinearLayout>
+
+        <!-- ══════════════════════════ PERMISSION FIX CARDS CONTAINER ══════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/llPermissionCards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" />
+
+        <!-- ══════════════════════════ LAST PAYMENT CARD ══════════════════════════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardLastPayment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/md_theme_surfaceContainerLowest">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Label row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/home_last_payment"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_outline"
+                        android:letterSpacing="0.1" />
+
+                </LinearLayout>
+
+                <!-- Content row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_no_payments_detected"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_onBackground" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/home_no_payments_hint"
+                            android:textSize="12sp"
+                            android:textColor="@color/md_theme_onSurfaceVariant" />
+
+                    </LinearLayout>
+
+                    <!-- Empty icon circle -->
+                    <FrameLayout
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_circle_gray">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_receipt_long"
+                            android:alpha="0.25"
+                            app:tint="@color/md_theme_onSurfaceVariant" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ══════════════════════════ TODAY SUMMARY CARD ══════════════════════════ -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardToday"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/md_theme_surfaceContainerLowest">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Label row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/home_today"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/md_theme_outline"
+                        android:letterSpacing="0.1" />
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_calendar_today"
+                        app:tint="@color/md_theme_outline" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_today_amount"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_onBackground" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/home_today_tx_count"
+                    android:textSize="12sp"
+                    android:textColor="@color/md_theme_onSurfaceVariant" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ══════════════════════════ RECENT TRANSACTIONS ══════════════════════════ -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/home_recent_transactions"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_onBackground" />
+
+            <Button
+                android:id="@+id/btnViewAll"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/home_view_all"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_statusSubtitle"
+                android:alpha="0.85"
+                android:letterSpacing="0.04" />
+
+        </LinearLayout>
+
+        <!-- Empty state -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/md_theme_surfaceContainerLowest">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp"
+                android:paddingTop="36dp"
+                android:paddingBottom="36dp">
+
+                <FrameLayout
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_circle_gray">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_receipt_long"
+                        android:alpha="0.4"
+                        app:tint="@color/md_theme_outline" />
+
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_no_transactions_yet"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_onBackground"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/home_no_transactions_hint"
+                    android:textSize="12sp"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
+                    android:gravity="center"
+                    android:maxWidth="240dp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

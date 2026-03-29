@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_permission_fix_card"
+    android:orientation="vertical"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:clipChildren="true"
+    android:clipToPadding="true">
+
+    <!-- Collapsed row (always visible, clickable to expand) -->
+    <LinearLayout
+        android:id="@+id/llCardHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp">
+
+        <!-- Icon circle -->
+        <FrameLayout
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_perm_icon_circle">
+
+            <ImageView
+                android:id="@+id/ivPermIcon"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_lock"
+                app:tint="@color/md_theme_secondary" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvPermTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_onBackground" />
+
+        <ImageView
+            android:id="@+id/ivExpandArrow"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_expand_more"
+            app:tint="@color/md_theme_onSurfaceVariant" />
+
+    </LinearLayout>
+
+    <!-- Expanded content (toggled) -->
+    <LinearLayout
+        android:id="@+id/llCardBody"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="64dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvPermDesc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/md_theme_onSurfaceVariant" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="14dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPermFixNow"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/home_fix_now"
+                android:textSize="12sp"
+                android:backgroundTint="@color/md_theme_secondary"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                app:cornerRadius="18dp" />
+
+            <Button
+                android:id="@+id/btnPermLater"
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/home_later"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/md_theme_onSurfaceVariant" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -47,4 +47,24 @@
     <color name="md_theme_inverseSurface">#2D3133</color>
     <color name="md_theme_inverseOnSurface">#EFF1F3</color>
     <color name="md_theme_inversePrimary">#BEC6E0</color>
+
+    <!-- Secondary-tinted Surfaces -->
+    <color name="md_theme_secondarySurface">#F6FBF9</color>
+    <color name="md_theme_secondarySurfaceDim">#F0F9F6</color>
+    <color name="md_theme_secondarySurfaceBright">#F6FAF8</color>
+    <color name="md_theme_secondarySurfaceContainer">#E6F7F0</color>
+
+    <!-- Secondary Alpha Overlays -->
+    <color name="md_theme_secondaryAlpha10">#1A006C49</color>
+    <color name="md_theme_secondaryAlpha20">#33006C49</color>
+    <color name="md_theme_secondaryContainerAlpha20">#336CF8BB</color>
+    <color name="md_theme_secondaryContainerAlpha0">#006CF8BB</color>
+
+    <!-- Status Text Colors -->
+    <color name="md_theme_statusActive">#065F46</color>
+    <color name="md_theme_statusSubtitle">#3A7C6B</color>
+    <color name="md_theme_statusMuted">#7FA89C</color>
+
+    <!-- Soft Error (light red for non-critical states) -->
+    <color name="md_theme_errorSoft">#E57373</color>
 </resources>

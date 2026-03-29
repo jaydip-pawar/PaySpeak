@@ -72,4 +72,58 @@
     <string name="setup_later">Set up later</string>
     <string name="setup_footer_note">You can change these anytime in Settings.</string>
     <string name="setup_progress">Setup progress: %1$d of %2$d enabled</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_activity">Activity</string>
+    <string name="nav_voice">Voice</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home Dashboard -->
+    <string name="home_status_listening">Listening for payments</string>
+    <string name="home_status_subtitle_all_active">Ready to announce payments instantly</string>
+    <string name="home_status_subtitle_partial">%1$d of %2$d protections active</string>
+    <string name="home_chip_notifications">Notifications</string>
+    <string name="home_chip_sms">SMS</string>
+    <string name="home_chip_accessibility">Accessibility</string>
+    <string name="home_action_required">ACTION REQUIRED</string>
+    <string name="home_action_required_hint">Enable remaining permissions for best accuracy</string>
+    <string name="home_fix_now">Fix now</string>
+    <string name="home_later">Later</string>
+    <string name="home_last_payment">LAST PAYMENT</string>
+    <string name="home_no_payments_detected">No payments detected</string>
+    <string name="home_no_payments_hint">Make a test payment to verify announcements</string>
+        <!-- Subtle activity feedback -->
+        <string name="home_status_listening_feedback">Listening for new transactions...</string>
+    <string name="home_today">TODAY</string>
+    <string name="home_today_amount">&#8377;0</string>
+    <string name="home_today_tx_count">0 transactions received</string>
+    <string name="home_recent_transactions">Recent Transactions</string>
+    <string name="home_view_all">View All</string>
+    <string name="home_no_transactions_yet">No transactions yet</string>
+    <string name="home_no_transactions_hint">Your recent payments will appear here</string>
+
+    <!-- Permission fix card titles and descriptions -->
+    <string name="perm_fix_notif_access_title">Enable notification access</string>
+    <string name="perm_fix_notif_access_desc">Allow PaySpeak to read payment alerts from apps like GPay, PhonePe, and Paytm.</string>
+    <string name="perm_fix_post_notif_title">Enable app notifications</string>
+    <string name="perm_fix_post_notif_desc">Allow PaySpeak to send voice confirmations and important alerts.</string>
+    <string name="perm_fix_sms_title">Enable SMS access</string>
+    <string name="perm_fix_sms_desc">Read bank messages to detect payments that may not appear in notifications.</string>
+    <string name="perm_fix_accessibility_title">Enable accessibility access</string>
+    <string name="perm_fix_accessibility_desc">Helps detect payments from apps that don\'t send proper notifications.</string>
+    <string name="perm_fix_battery_title">Allow background activity</string>
+    <string name="perm_fix_battery_desc">Prevent your device from stopping PaySpeak so announcements work reliably.</string>
+
+    <!-- Home screen permission card titles and descriptions (consequence-focused) -->
+    <string name="home_perm_notif_access_title">Notification access disabled</string>
+    <string name="home_perm_notif_access_desc">You may miss instant payment alerts from apps like GPay and PhonePe.</string>
+    <string name="home_perm_post_notif_title">App notifications turned off</string>
+    <string name="home_perm_post_notif_desc">You won\'t hear confirmations or important alerts from PaySpeak.</string>
+    <string name="home_perm_sms_title">SMS access not enabled</string>
+    <string name="home_perm_sms_desc">Some bank payments may not be detected if they don\'t send app notifications.</string>
+    <string name="home_perm_accessibility_title">Accessibility access off</string>
+    <string name="home_perm_accessibility_desc">Payment detection may be less reliable in some apps.</string>
+    <string name="home_perm_battery_title">Background activity restricted</string>
+    <string name="home_perm_battery_desc">Announcements may stop working when your screen is off.</string>
 </resources>
