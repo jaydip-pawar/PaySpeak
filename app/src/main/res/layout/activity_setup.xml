@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/setupRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/md_theme_background">
@@ -32,12 +33,12 @@
 
     <!-- Scrollable Content -->
     <ScrollView
+        android:id="@+id/setupScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
         android:scrollbars="none"
         android:clipToPadding="false"
-        android:paddingBottom="140dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -213,15 +214,15 @@
                     android:id="@+id/tvBadgePostNotifications"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/setup_badge_recommended"
+                    android:text="@string/setup_badge_optional"
                     android:textAllCaps="true"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.05"
                     android:paddingHorizontal="@dimen/spacing_md"
                     android:paddingVertical="@dimen/spacing_xs"
-                    android:background="@drawable/bg_badge_recommended"
-                    android:textColor="@color/md_theme_onSecondaryContainer"
+                    android:background="@drawable/bg_badge_optional"
+                    android:textColor="@color/md_theme_onSurfaceVariant"
                     app:layout_constraintTop_toTopOf="@id/iconFramePostNotifications"
                     app:layout_constraintBottom_toBottomOf="@id/iconFramePostNotifications"
                     app:layout_constraintEnd_toEndOf="parent" />
@@ -689,6 +690,7 @@
 
     <!-- Bottom Bar -->
     <LinearLayout
+        android:id="@+id/bottomFooterBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"

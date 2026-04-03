@@ -2,10 +2,13 @@ package com.pp.payspeak.ui
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.pp.payspeak.R
 import com.pp.payspeak.core.speech.SpeechEngine
 import com.pp.payspeak.utils.PreferenceManager
@@ -17,6 +20,16 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+
+        // Edge-to-edge safe area: apply status bar and nav bar insets to scrollable content
+        val settingsContent = findViewById<LinearLayout>(R.id.settingsContent)
+        val contentBasePaddingTop = settingsContent.paddingTop
+        val contentBasePaddingBottom = settingsContent.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settingsRoot)) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            settingsContent.setPadding(settingsContent.paddingStart, contentBasePaddingTop + systemBars.top, settingsContent.paddingEnd, contentBasePaddingBottom + systemBars.bottom)
+            insets
+        }
 
         preferenceManager = PreferenceManager(this)
         // LEAK-01: use applicationContext — TextToSpeech holds an internal reference to the

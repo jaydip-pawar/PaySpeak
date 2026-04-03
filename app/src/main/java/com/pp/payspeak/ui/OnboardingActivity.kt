@@ -7,6 +7,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
 import com.pp.payspeak.R
@@ -27,6 +29,17 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_onboarding)
 
         preferenceManager = PreferenceManager(this)
+
+        // Edge-to-edge safe area: apply status bar inset to top bar and nav bar inset to bottom bar
+        val topBar = findViewById<View>(R.id.topBar)
+        val bottomBar = findViewById<View>(R.id.bottomBar)
+        val bottomBarBasePaddingBottom = bottomBar.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.onboardingRoot)) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            topBar.setPadding(topBar.paddingStart, systemBars.top, topBar.paddingEnd, topBar.paddingBottom)
+            bottomBar.setPadding(bottomBar.paddingStart, bottomBar.paddingTop, bottomBar.paddingEnd, bottomBarBasePaddingBottom + systemBars.bottom)
+            insets
+        }
 
         initViews()
         setupViewPager()

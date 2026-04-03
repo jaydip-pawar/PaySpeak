@@ -25,7 +25,11 @@ import com.pp.payspeak.R
 import com.pp.payspeak.services.PaymentAnnouncerService
 import com.pp.payspeak.utils.OemAutoStartHelper
 import com.pp.payspeak.utils.PreferenceManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
+import android.widget.ScrollView
 
 class SetupActivity : AppCompatActivity() {
 
@@ -42,6 +46,12 @@ class SetupActivity : AppCompatActivity() {
     private lateinit var tvSetupProgress: TextView
     private lateinit var llScrollContent: LinearLayout
     private lateinit var llFooterButtons: LinearLayout
+    private lateinit var bottomFooterBar: LinearLayout
+    private lateinit var setupScrollView: ScrollView
+
+    // Set true when user taps the OEM autostart button; cleared in onResume after acknowledging.
+    // Prevents falsely marking OEM autostart as granted on first screen load.
+    private var pendingOemAck = false
 
     // Computed dynamically so it reflects whether the OEM card is included
     private val totalPermissions get() = cards.size
@@ -87,6 +97,26 @@ class SetupActivity : AppCompatActivity() {
         preferenceManager = PreferenceManager(this)
 
         initViews()
+
+        // Edge-to-edge: footer paddingBottom = max(design spacing, nav bar inset)
+        // Scroll view paddingBottom = actual footer height so last card isn't hidden
+        val spacingXxl = resources.getDimensionPixelSize(R.dimen.spacing_xxl)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.setupRoot)) { _, insets ->
+            val navBar = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            val footerBottomPad = maxOf(spacingXxl, navBar)
+            llFooterButtons.setPadding(
+                llFooterButtons.paddingStart,
+                llFooterButtons.paddingTop,
+                llFooterButtons.paddingEnd,
+                footerBottomPad
+            )
+            // After footer re-measures, sync scroll view bottom padding to footer height
+            bottomFooterBar.doOnLayout {
+                setupScrollView.setPadding(0, 0, 0, bottomFooterBar.height)
+            }
+            insets
+        }
+
         buildCards()
         setupListeners()
         refreshButtonStates()
@@ -94,13 +124,14 @@ class SetupActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Acknowledge OEM autostart for non-MIUI devices when user returns from OEM settings,
-        // since there is no programmatic API to confirm the grant on Samsung/Huawei/etc.
-        if (OemAutoStartHelper.isRequired() && !OemAutoStartHelper.isGranted(this)) {
-            val mfr = android.os.Build.MANUFACTURER.lowercase()
-            if (mfr != "xiaomi" && mfr != "redmi" && mfr != "poco") {
-                OemAutoStartHelper.acknowledge(this)
-            }
+        // Only acknowledge for non-MIUI OEM devices AFTER the user explicitly tapped the button
+        // and navigated to the OEM settings screen. Without this guard, isGranted() would return
+        // true immediately on first load before the user does anything.
+        if (pendingOemAck && OemAutoStartHelper.isRequired()) {
+            pendingOemAck = false
+            // Always acknowledge: for MIUI this acts as fallback if reflection fails;
+            // for other OEMs it is the only signal that the user visited settings.
+            OemAutoStartHelper.acknowledge(this)
         }
         refreshButtonStates()
     }
@@ -115,6 +146,8 @@ class SetupActivity : AppCompatActivity() {
         btnContinueHome = findViewById(R.id.btnContinueHome)
         btnSetupLater = findViewById(R.id.btnSetupLater)
         llFooterButtons = findViewById(R.id.llFooterButtons)
+        bottomFooterBar = findViewById(R.id.bottomFooterBar)
+        setupScrollView = findViewById(R.id.setupScrollView)
         tvSetupProgress = findViewById(R.id.tvSetupProgress)
         llScrollContent = findViewById(R.id.llScrollContent)
     }
@@ -165,11 +198,36 @@ class SetupActivity : AppCompatActivity() {
             return CardInfo(card, iconFrame, title, desc, button, collapsedSet, expandedSet, grantedSet, isGranted)
         }
 
-        val baseCards = mutableListOf(
+        // Card order: Recommended → Reliability → Optional
+        // Recommended tier
+        val recommendedCards = mutableListOf(
             makeCard(R.id.cardNotificationAccess, R.id.iconFrameNotificationAccess,
                 R.id.tvTitleNotificationAccess, R.id.tvBadgeNotificationAccess,
                 R.id.ivCheckNotificationAccess, R.id.tvDescNotificationAccess,
-                R.id.btnNotificationAccess, btnNotificationAccess, ::isNotificationListenerGranted),
+                R.id.btnNotificationAccess, btnNotificationAccess, ::isNotificationListenerGranted)
+        )
+
+        // OEM autostart is also Recommended — insert after NotificationAccess
+        if (OemAutoStartHelper.isRequired()) {
+            findViewById<ConstraintLayout>(R.id.cardAutoStart).visibility = View.VISIBLE
+            recommendedCards.add(
+                makeCard(R.id.cardAutoStart, R.id.iconFrameAutoStart,
+                    R.id.tvTitleAutoStart, R.id.tvBadgeAutoStart,
+                    R.id.ivCheckAutoStart, R.id.tvDescAutoStart,
+                    R.id.btnAutoStart, btnAutoStart, ::isOemAutoStartGranted)
+            )
+        }
+
+        // Reliability tier
+        val reliabilityCards = mutableListOf(
+            makeCard(R.id.cardBackground, R.id.iconFrameBackground,
+                R.id.tvTitleBackground, R.id.tvBadgeBackground,
+                R.id.ivCheckBackground, R.id.tvDescBackground,
+                R.id.btnBackground, btnBackground, ::isBatteryOptimizationDisabled)
+        )
+
+        // Optional tier
+        val optionalCards = mutableListOf(
             makeCard(R.id.cardPostNotifications, R.id.iconFramePostNotifications,
                 R.id.tvTitlePostNotifications, R.id.tvBadgePostNotifications,
                 R.id.ivCheckPostNotifications, R.id.tvDescPostNotifications,
@@ -181,26 +239,16 @@ class SetupActivity : AppCompatActivity() {
             makeCard(R.id.cardAccessibility, R.id.iconFrameAccessibility,
                 R.id.tvTitleAccessibility, R.id.tvBadgeAccessibility,
                 R.id.ivCheckAccessibility, R.id.tvDescAccessibility,
-                R.id.btnAccessibility, btnAccessibility, ::isAccessibilityGranted),
-            makeCard(R.id.cardBackground, R.id.iconFrameBackground,
-                R.id.tvTitleBackground, R.id.tvBadgeBackground,
-                R.id.ivCheckBackground, R.id.tvDescBackground,
-                R.id.btnBackground, btnBackground, ::isBatteryOptimizationDisabled)
+                R.id.btnAccessibility, btnAccessibility, ::isAccessibilityGranted)
         )
 
-        // Only include the OEM autostart card on devices that actually have OEM restrictions.
-        // On stock Android this card would show a dead settings path, so we gate it here.
-        if (OemAutoStartHelper.isRequired()) {
-            findViewById<ConstraintLayout>(R.id.cardAutoStart).visibility = View.VISIBLE
-            baseCards.add(
-                makeCard(R.id.cardAutoStart, R.id.iconFrameAutoStart,
-                    R.id.tvTitleAutoStart, R.id.tvBadgeAutoStart,
-                    R.id.ivCheckAutoStart, R.id.tvDescAutoStart,
-                    R.id.btnAutoStart, btnAutoStart, ::isOemAutoStartGranted)
-            )
-        }
+        cards = (recommendedCards + reliabilityCards + optionalCards).toMutableList()
 
-        cards = baseCards
+        // Physically reorder views in the LinearLayout to match the cards list.
+        // The XML defines a fixed order; this overrides it so Recommended cards always appear first.
+        // Indices 0 and 1 in llScrollContent are the description text and tip card — skip them.
+        cards.forEach { llScrollContent.removeView(it.card) }
+        cards.forEachIndexed { i, info -> llScrollContent.addView(info.card, 2 + i) }
 
         cards.forEachIndexed { index, cardInfo ->
             cardInfo.card.setOnClickListener {
@@ -255,6 +303,7 @@ class SetupActivity : AppCompatActivity() {
             })
         }
         btnAutoStart.setOnClickListener {
+            pendingOemAck = true  // onResume will acknowledge after user returns from settings
             startActivity(OemAutoStartHelper.getAutoStartIntent(this))
         }
         btnContinueHome.setOnClickListener { finishSetup() }

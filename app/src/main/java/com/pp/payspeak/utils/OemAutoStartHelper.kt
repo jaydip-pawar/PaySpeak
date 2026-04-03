@@ -65,15 +65,24 @@ object OemAutoStartHelper {
         prefs(context).getBoolean(KEY_OEM_AUTOSTART_ACK, false)
 
     /**
-     * MIUI exposes autostart state via AppOps integer op 10008.
-     * Returns false on any exception so the card keeps showing if detection fails.
+     * MIUI exposes autostart state via integer op 10008. There is no standard string name
+     * for this op, so we must reflect into the hidden checkOpNoThrow(Int, Int, String) overload.
+     * If reflection fails (different MIUI version, restricted policy), falls back to the same
+     * user-acknowledgment approach used for other OEM devices.
      */
-    @Suppress("DEPRECATION")
     private fun isMiuiAutoStartEnabled(context: Context): Boolean = try {
         val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        ops.checkOpNoThrow(10008, Process.myUid(), context.packageName) == AppOpsManager.MODE_ALLOWED
+        val method = AppOpsManager::class.java.getMethod(
+            "checkOpNoThrow",
+            Int::class.javaPrimitiveType,
+            Int::class.javaPrimitiveType,
+            String::class.java
+        )
+        val result = method.invoke(ops, 10008, Process.myUid(), context.packageName) as Int
+        result == AppOpsManager.MODE_ALLOWED
     } catch (_: Exception) {
-        false
+        // Reflection unavailable on this MIUI build — fall back to acknowledgment.
+        isAcknowledged(context)
     }
 
     /**

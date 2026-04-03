@@ -9,7 +9,7 @@
         {
             "label": "Build and Run Android App",
             "type": "shell",
-            "command": "./gradlew installDebug && ~/Library/Android/sdk/platform-tools/adb shell am start -n com.pp.payspeak/.ui.MainActivity",
+            "command": "./scripts/build_and_run.sh",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -20,7 +20,7 @@
                 "clear": true
             },
             "problemMatcher": [],
-            "detail": "Builds the debug APK, installs it on the emulator using adb, and launches the main activity."
+            "detail": "Builds the debug APK, lists connected devices, prompts to pick one, installs and launches."
         },
         {
             "label": "Clean Project",

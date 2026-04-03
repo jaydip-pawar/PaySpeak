@@ -1,10 +1,12 @@
 package com.pp.payspeak.services
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.os.SystemClock
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -127,6 +129,41 @@ class PaymentAnnouncerService : Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    /**
+     * Called when the user removes our task from the recents list ("clear all").
+     * On OEM devices (MIUI/Samsung/etc.) that block self-triggered alarms, we skip the alarm —
+     * scheduling it actually poisons MIUI's ProcessStarter "frequent died" state, blocking
+     * even the system-delivered SMS and NLS wakeups that would otherwise work.
+     * On stock Android, we schedule a 1-second AlarmManager wakeup so the service restarts
+     * quickly via ServiceRestartReceiver.
+     */
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        val mfr = Build.MANUFACTURER.lowercase()
+        val isOem = mfr in setOf("xiaomi", "redmi", "poco", "samsung", "huawei", "honor", "oppo", "vivo", "oneplus", "realme")
+        if (isOem) {
+            // On MIUI/OEM: don't set the alarm. Our callerPkg=com.pp.payspeak alarm would be
+            // flagged as "frequent died" by ProcessStarter (isStartingApp=false) and would also
+            // block subsequent SMS/NLS wakeups from system packages.
+            Log.d(TAG, "onTaskRemoved on OEM device — skipping alarm, relying on SMS/NLS system wakeup")
+            return
+        }
+        Log.d(TAG, "onTaskRemoved — scheduling restart alarm")
+        val restartIntent = Intent(this, ServiceRestartReceiver::class.java).apply {
+            action = "com.pp.payspeak.RESTART_SERVICE"
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this, 101, restartIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.set(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + 1_000L,
+            pendingIntent
+        )
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -277,14 +314,11 @@ class PaymentAnnouncerService : Service() {
                     Log.d(TAG, "  speechEngine ready: ${speechEngine.isReady()}")
                     DebugLogger.logLanguageSelection(languageManager.getCurrentLanguage().code, announcement)
 
-                    if (speechEngine.isReady()) {
-                        DebugLogger.logSpeechStart(announcement, languageManager.getCurrentLanguage().code)
-                        speechEngine.announcePayment(announcement, languageManager.getCurrentLanguage().code) {
-                            Log.d(TAG, "  TTS complete for: $announcement")
-                            DebugLogger.logSpeechComplete()
-                        }
-                    } else {
-                        Log.e(TAG, "  SKIP speechEngine not ready — TTS failed to initialise")
+                    // announcePayment() queues internally if TTS not yet ready (cold start case)
+                    DebugLogger.logSpeechStart(announcement, languageManager.getCurrentLanguage().code)
+                    speechEngine.announcePayment(announcement, languageManager.getCurrentLanguage().code) {
+                        Log.d(TAG, "  TTS complete for: $announcement")
+                        DebugLogger.logSpeechComplete()
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error announcing payment", e)

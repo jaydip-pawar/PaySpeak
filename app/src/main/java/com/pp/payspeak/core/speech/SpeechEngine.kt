@@ -22,8 +22,10 @@ class SpeechEngine(private val context: Context) {
     private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private var wakeLock: PowerManager.WakeLock? = null
     private var audioFocusRequest: AudioFocusRequest? = null
-    private data class SpeechTask(val text: String, val language: String)
+    private data class SpeechTask(val text: String, val language: String, val onComplete: (() -> Unit)? = null)
     private val speechQueue = LinkedBlockingQueue<SpeechTask>()
+    // Tasks queued before TTS is ready (e.g. service cold-started by SMS/notification wakeup)
+    private val pendingBeforeReady = LinkedBlockingQueue<SpeechTask>()
     private var speechRate: Float = 0.9f
     private var pitch: Float = 1.0f
     private var volume: Float = 1.0f
@@ -60,6 +62,15 @@ class SpeechEngine(private val context: Context) {
                             isReady = true
                             initializeAttempts = 0
                             Log.d(TAG, "TextToSpeech initialized successfully")
+                            // Drain any payments that arrived before TTS was ready
+                            // (e.g. service cold-started by SMS/notification wakeup)
+                            val deferred = mutableListOf<SpeechTask>()
+                            pendingBeforeReady.drainTo(deferred)
+                            if (deferred.isNotEmpty()) {
+                                Log.d(TAG, "Draining ${deferred.size} deferred announcement(s)")
+                                deferred.forEach { speechQueue.offer(it) }
+                                processQueue(deferred.last().onComplete)
+                            }
                         }
                     } else {
                         Log.e(TAG, "TextToSpeech initialization failed with status: $status")
@@ -99,11 +110,11 @@ class SpeechEngine(private val context: Context) {
 
     fun announcePayment(announcement: String, language: String = "en", onComplete: (() -> Unit)? = null) {
         if (!isReady) {
-            Log.w(TAG, "Speech engine not ready, skipping announcement")
-            onComplete?.invoke()
+            Log.w(TAG, "Speech engine not ready — queuing announcement for when TTS initialises")
+            pendingBeforeReady.offer(SpeechTask(announcement, language, onComplete))
             return
         }
-        speechQueue.offer(SpeechTask(announcement, language))
+        speechQueue.offer(SpeechTask(announcement, language, onComplete))
         processQueue(onComplete)
     }
 

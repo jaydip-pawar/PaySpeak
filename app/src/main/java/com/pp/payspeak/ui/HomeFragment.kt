@@ -55,6 +55,8 @@ class HomeFragment : Fragment() {
     private lateinit var permissions: List<PermissionInfo>
     private var pulseAnimator: ObjectAnimator? = null
     private val dismissedIndices = mutableSetOf<Int>()
+    // Set true when user taps OEM autostart "Fix now"; cleared in onResume after acknowledging.
+    private var pendingOemAck = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -69,6 +71,13 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // Only acknowledge for non-MIUI OEM devices AFTER the user explicitly tapped "Fix now".
+        if (pendingOemAck && OemAutoStartHelper.isRequired()) {
+            pendingOemAck = false
+            // Always acknowledge: for MIUI this acts as fallback if reflection fails;
+            // for other OEMs it is the only signal that the user visited settings.
+            OemAutoStartHelper.acknowledge(requireContext())
+        }
         dismissedIndices.clear()  // reset dismiss state on every resume
         updatePermissionCard()
         updateChips()
@@ -169,6 +178,7 @@ class HomeFragment : Fragment() {
                 iconRes = R.drawable.ic_bolt,
                 isGranted = { OemAutoStartHelper.isGranted(requireContext()) },
                 onFix = {
+                    pendingOemAck = true  // onResume will acknowledge after user returns
                     startActivity(OemAutoStartHelper.getAutoStartIntent(requireContext()))
                 }
             )
