@@ -62,6 +62,9 @@
     <string name="setup_accessibility_desc">Adds support for detecting payments in apps that don\'t send clear notifications.</string>
     <string name="setup_background_title">Allow background activity</string>
     <string name="setup_background_desc">Keeps announcements working even when your phone is idle or screen is off.</string>
+    <string name="setup_autostart_title">Keep app always active</string>
+    <string name="setup_autostart_desc">Your device may stop PaySpeak after clearing recent apps or restarting. Enable autostart so payment announcements are never missed.</string>
+    <string name="setup_autostart_btn">Open settings</string>
     <string name="setup_badge_recommended">Recommended</string>
     <string name="setup_badge_optional">Optional</string>
     <string name="setup_badge_reliability">Reliability</string>
@@ -126,4 +129,6 @@
     <string name="home_perm_accessibility_desc">Payment detection may be less reliable in some apps.</string>
     <string name="home_perm_battery_title">Background activity restricted</string>
     <string name="home_perm_battery_desc">Announcements may stop working when your screen is off.</string>
+    <string name="home_perm_autostart_title">Autostart blocked by your device</string>
+    <string name="home_perm_autostart_desc">Your device may stop PaySpeak after clearing recent apps. Enable autostart in your device settings to make sure payment announcements always work.</string>
 </resources>

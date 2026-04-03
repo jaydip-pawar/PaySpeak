@@ -576,6 +576,105 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <!-- Card 6: OEM Autostart — only made visible on restricted OEM devices at runtime -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cardAutoStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card_surface"
+                android:padding="@dimen/spacing_lg"
+                android:layout_marginBottom="@dimen/spacing_md"
+                android:visibility="gone">
+
+                <FrameLayout
+                    android:id="@+id/iconFrameAutoStart"
+                    android:layout_width="@dimen/icon_container_size"
+                    android:layout_height="@dimen/icon_container_size"
+                    android:background="@drawable/bg_icon_rounded_white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+                    <ImageView
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_bolt"
+                        app:tint="@color/md_theme_secondary"
+                        android:contentDescription="@null" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvBadgeAutoStart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_badge_recommended"
+                    android:textAllCaps="true"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingHorizontal="@dimen/spacing_md"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:background="@drawable/bg_badge_recommended"
+                    android:textColor="@color/md_theme_onSecondaryContainer"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameAutoStart"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameAutoStart"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <ImageView
+                    android:id="@+id/ivCheckAutoStart"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/md_theme_secondary"
+                    android:visibility="gone"
+                    android:contentDescription="@null"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameAutoStart"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameAutoStart"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvTitleAutoStart"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_autostart_title"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.LabelLarge"
+                    android:textSize="16sp"
+                    android:layout_marginStart="@dimen/spacing_md"
+                    app:layout_constraintStart_toEndOf="@id/iconFrameAutoStart"
+                    app:layout_constraintEnd_toStartOf="@id/tvBadgeAutoStart"
+                    app:layout_constraintTop_toTopOf="@id/iconFrameAutoStart"
+                    app:layout_constraintBottom_toBottomOf="@id/iconFrameAutoStart" />
+
+                <TextView
+                    android:id="@+id/tvDescAutoStart"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/setup_autostart_desc"
+                    android:textAppearance="@style/TextAppearance.PaySpeak.BodySmall"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/spacing_sm"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitleAutoStart"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAutoStart"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:visibility="gone"
+                    android:text="@string/setup_autostart_btn"
+                    android:textColor="@color/md_theme_onSecondary"
+                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/spacing_lg"
+                    app:backgroundTint="@color/md_theme_secondary"
+                    app:cornerRadius="@dimen/radius_card"
+                    android:stateListAnimator="@null"
+                    app:layout_constraintTop_toBottomOf="@id/tvDescAutoStart"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <!-- Footer note -->
             <TextView
                 android:layout_width="match_parent"

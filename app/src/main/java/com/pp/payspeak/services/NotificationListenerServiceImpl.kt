@@ -1,6 +1,7 @@
 package com.pp.payspeak.services
 
 import android.content.ComponentName
+import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -94,7 +95,34 @@ class NotificationListenerServiceImpl : NotificationListenerService() {
                         val processed = eventManager.procesPaymentEvent(adjusted)
                         if (processed != null) {
                             Log.d(TAG, "  dedup OK → broadcasting payment")
-                            PaymentAnnouncementBroadcaster.broadcastPaymentDetected(this@NotificationListenerServiceImpl, processed)
+                            if (PaymentAnnouncerService.isRunning) {
+                                // Service is alive — use the normal internal broadcast path
+                                PaymentAnnouncementBroadcaster.broadcastPaymentDetected(
+                                    this@NotificationListenerServiceImpl, processed
+                                )
+                            } else {
+                                // PaymentAnnouncerService was killed by OEM. Start it and pass
+                                // the payment data as extras — onStartCommand() will re-broadcast
+                                // once the internal receiver is registered.
+                                Log.d(TAG, "  PaymentAnnouncerService not running — starting with payment extras")
+                                val serviceIntent = Intent(
+                                    this@NotificationListenerServiceImpl,
+                                    PaymentAnnouncerService::class.java
+                                ).apply {
+                                    putExtra("amount", processed.amount)
+                                    putExtra("sender", processed.sender)
+                                    putExtra("app", processed.appName.name)
+                                    putExtra("success", processed.success)
+                                    putExtra("source", processed.source.name)
+                                    putExtra("confidence", processed.confidenceScore)
+                                    putExtra("timestamp", processed.timestamp)
+                                }
+                                runCatching {
+                                    startForegroundService(serviceIntent)
+                                }.onFailure {
+                                    Log.e(TAG, "Failed to start PaymentAnnouncerService from notification", it)
+                                }
+                            }
                         } else {
                             Log.w(TAG, "  SKIP dedup suppressed amount=${adjusted.amount}, sender=${adjusted.sender}")
                             DebugLogger.logDuplicateDetected(adjusted.amount, adjusted.sender)

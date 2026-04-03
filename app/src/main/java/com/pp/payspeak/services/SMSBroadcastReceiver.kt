@@ -47,7 +47,24 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
                             val processed = eventManager.procesPaymentEvent(event)
                             if (processed != null) {
                                 val smsEvent = processed.copy(appName = PaymentApp.UNKNOWN)
-                                PaymentAnnouncementBroadcaster.broadcastPaymentDetected(context, smsEvent)
+                                if (PaymentAnnouncerService.isRunning) {
+                                    // Service is alive — use the normal broadcast path
+                                    PaymentAnnouncementBroadcaster.broadcastPaymentDetected(context, smsEvent)
+                                } else {
+                                    // Service was killed — start it and pass the payment as extras
+                                    // so onStartCommand() can re-broadcast once the receiver is registered
+                                    val serviceIntent = Intent(context, PaymentAnnouncerService::class.java).apply {
+                                        putExtra("amount", smsEvent.amount)
+                                        putExtra("sender", smsEvent.sender)
+                                        putExtra("app", smsEvent.appName.name)
+                                        putExtra("success", smsEvent.success)
+                                        putExtra("source", smsEvent.source.name)
+                                        putExtra("confidence", smsEvent.confidenceScore)
+                                        putExtra("timestamp", smsEvent.timestamp)
+                                    }
+                                    runCatching { context.startForegroundService(serviceIntent) }
+                                        .onFailure { Log.e(TAG, "Failed to start service for SMS payment", it) }
+                                }
                             } else {
                                 DebugLogger.logDuplicateDetected(event.amount, event.sender)
                             }

@@ -36,6 +36,12 @@ private const val CHANNEL_ID = "com.pp.payspeak.announcement"
 private const val COOLDOWN_MS = 3_000L
 
 class PaymentAnnouncerService : Service() {
+
+    companion object {
+        /** True while the service is alive. Read by watchdog and receivers to avoid redundant starts. */
+        @Volatile var isRunning: Boolean = false
+    }
+
     private lateinit var speechEngine: SpeechEngine
     private lateinit var languageManager: LanguageManager
     private lateinit var eventManager: PaymentEventManager
@@ -62,6 +68,7 @@ class PaymentAnnouncerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        isRunning = true
         Log.d(TAG, "Service created")
         DebugLogger.logServiceStart("PaymentAnnouncerService")
 
@@ -103,13 +110,27 @@ class PaymentAnnouncerService : Service() {
         Log.d(TAG, "Service started")
         val notification = createServiceNotification()
         runCatching { notificationManager.notify(NOTIFICATION_ID, notification) }
+        // Re-broadcast payment data passed directly from SMSBroadcastReceiver when the
+        // service was dead. By this point onCreate() has already registered the receiver.
+        intent?.let { rebroadcastIfPaymentExtras(it) }
         return START_STICKY
+    }
+
+    private fun rebroadcastIfPaymentExtras(intent: Intent) {
+        if (intent.getLongExtra("amount", -1L) < 0) return
+        Log.d(TAG, "Rebroadcasting direct payment extras from start intent")
+        val rebroadcast = Intent("com.pp.payspeak.PAYMENT_DETECTED").apply {
+            putExtras(intent)
+            setPackage(packageName)
+        }
+        sendBroadcast(rebroadcast)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         super.onDestroy()
+        isRunning = false
         Log.d(TAG, "Service destroyed")
         DebugLogger.logServiceStop("PaymentAnnouncerService")
         if (::paymentBroadcastReceiver.isInitialized) {

@@ -2,6 +2,7 @@ package com.pp.payspeak.services
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Intent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.util.Log
@@ -60,7 +61,34 @@ class AccessibilityServiceImpl : AccessibilityService() {
                                     DebugLogger.logExtractionResult(extractedEvent.amount, extractedEvent.sender, extractedEvent.appName.name, extractedEvent.success, extractedEvent.confidenceScore)
                                     val processed = eventManager.procesPaymentEvent(extractedEvent)
                                     if (processed != null) {
-                                        PaymentAnnouncementBroadcaster.broadcastPaymentDetected(this@AccessibilityServiceImpl, processed)
+                                        if (PaymentAnnouncerService.isRunning) {
+                                            // Service is alive — use the normal broadcast path
+                                            PaymentAnnouncementBroadcaster.broadcastPaymentDetected(
+                                                this@AccessibilityServiceImpl, processed
+                                            )
+                                        } else {
+                                            // PaymentAnnouncerService was killed by OEM. Start it
+                                            // with payment extras so onStartCommand() re-broadcasts
+                                            // once the internal receiver is registered.
+                                            Log.d(TAG, "PaymentAnnouncerService not running — starting with payment extras")
+                                            val serviceIntent = Intent(
+                                                this@AccessibilityServiceImpl,
+                                                PaymentAnnouncerService::class.java
+                                            ).apply {
+                                                putExtra("amount", processed.amount)
+                                                putExtra("sender", processed.sender)
+                                                putExtra("app", processed.appName.name)
+                                                putExtra("success", processed.success)
+                                                putExtra("source", processed.source.name)
+                                                putExtra("confidence", processed.confidenceScore)
+                                                putExtra("timestamp", processed.timestamp)
+                                            }
+                                            runCatching {
+                                                startForegroundService(serviceIntent)
+                                            }.onFailure {
+                                                Log.e(TAG, "Failed to start PaymentAnnouncerService from accessibility", it)
+                                            }
+                                        }
                                     } else {
                                         DebugLogger.logDuplicateDetected(extractedEvent.amount, extractedEvent.sender)
                                     }

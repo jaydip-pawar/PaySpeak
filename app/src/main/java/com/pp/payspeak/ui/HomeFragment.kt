@@ -22,6 +22,7 @@ import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 import com.pp.payspeak.R
+import com.pp.payspeak.utils.OemAutoStartHelper
 
 class HomeFragment : Fragment() {
 
@@ -159,6 +160,19 @@ class HomeFragment : Fragment() {
                 }
             )
         )
+        // Only show the OEM autostart card on devices that actually enforce the restriction.
+        // On stock Android there is no such setting and showing the card would confuse users.
+        if (OemAutoStartHelper.isRequired()) {
+            permissions = permissions + PermissionInfo(
+                titleRes = R.string.home_perm_autostart_title,
+                descRes = R.string.home_perm_autostart_desc,
+                iconRes = R.drawable.ic_bolt,
+                isGranted = { OemAutoStartHelper.isGranted(requireContext()) },
+                onFix = {
+                    startActivity(OemAutoStartHelper.getAutoStartIntent(requireContext()))
+                }
+            )
+        }
     }
 
     // ── Animation ──────────────────────────────────────────────────────────

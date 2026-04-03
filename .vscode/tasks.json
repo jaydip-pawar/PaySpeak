@@ -26,7 +26,8 @@
             "label": "Clean Project",
             "type": "shell",
             "command": "./gradlew clean",
-            "group": "build"
+            "group": "build",
+            "detail": "Cleans the project by deleting all build output directories."
         },
         {
             "label": "View Logcat",
@@ -37,6 +38,29 @@
                 "panel": "dedicated"
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Run Android Emulator",
+            "type": "shell",
+            "command": "~/Library/Android/sdk/emulator/emulator -avd $(~/Library/Android/sdk/emulator/emulator -list-avds | head -1)",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true,
+            "problemMatcher": [],
+            "detail": "Launches the first available Android emulator AVD."
+        },
+        {
+            "label": "Run iOS Simulator",
+            "type": "shell",
+            "command": "open -a Simulator",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Opens the iOS Simulator app."
         }
     ]
 }

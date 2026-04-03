@@ -23,6 +23,7 @@ import androidx.core.content.PermissionChecker
 import com.google.android.material.button.MaterialButton
 import com.pp.payspeak.R
 import com.pp.payspeak.services.PaymentAnnouncerService
+import com.pp.payspeak.utils.OemAutoStartHelper
 import com.pp.payspeak.utils.PreferenceManager
 import androidx.core.view.isVisible
 
@@ -35,13 +36,15 @@ class SetupActivity : AppCompatActivity() {
     private lateinit var btnSmsAccess: MaterialButton
     private lateinit var btnAccessibility: MaterialButton
     private lateinit var btnBackground: MaterialButton
+    private lateinit var btnAutoStart: MaterialButton
     private lateinit var btnContinueHome: MaterialButton
     private lateinit var btnSetupLater: Button
     private lateinit var tvSetupProgress: TextView
     private lateinit var llScrollContent: LinearLayout
     private lateinit var llFooterButtons: LinearLayout
 
-    private val totalPermissions = 5
+    // Computed dynamically so it reflects whether the OEM card is included
+    private val totalPermissions get() = cards.size
     private var expandedCardIndex = 0
 
     /**
@@ -91,6 +94,14 @@ class SetupActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Acknowledge OEM autostart for non-MIUI devices when user returns from OEM settings,
+        // since there is no programmatic API to confirm the grant on Samsung/Huawei/etc.
+        if (OemAutoStartHelper.isRequired() && !OemAutoStartHelper.isGranted(this)) {
+            val mfr = android.os.Build.MANUFACTURER.lowercase()
+            if (mfr != "xiaomi" && mfr != "redmi" && mfr != "poco") {
+                OemAutoStartHelper.acknowledge(this)
+            }
+        }
         refreshButtonStates()
     }
 
@@ -100,6 +111,7 @@ class SetupActivity : AppCompatActivity() {
         btnSmsAccess = findViewById(R.id.btnSmsAccess)
         btnAccessibility = findViewById(R.id.btnAccessibility)
         btnBackground = findViewById(R.id.btnBackground)
+        btnAutoStart = findViewById(R.id.btnAutoStart)
         btnContinueHome = findViewById(R.id.btnContinueHome)
         btnSetupLater = findViewById(R.id.btnSetupLater)
         llFooterButtons = findViewById(R.id.llFooterButtons)
@@ -153,7 +165,7 @@ class SetupActivity : AppCompatActivity() {
             return CardInfo(card, iconFrame, title, desc, button, collapsedSet, expandedSet, grantedSet, isGranted)
         }
 
-        cards = listOf(
+        val baseCards = mutableListOf(
             makeCard(R.id.cardNotificationAccess, R.id.iconFrameNotificationAccess,
                 R.id.tvTitleNotificationAccess, R.id.tvBadgeNotificationAccess,
                 R.id.ivCheckNotificationAccess, R.id.tvDescNotificationAccess,
@@ -175,6 +187,20 @@ class SetupActivity : AppCompatActivity() {
                 R.id.ivCheckBackground, R.id.tvDescBackground,
                 R.id.btnBackground, btnBackground, ::isBatteryOptimizationDisabled)
         )
+
+        // Only include the OEM autostart card on devices that actually have OEM restrictions.
+        // On stock Android this card would show a dead settings path, so we gate it here.
+        if (OemAutoStartHelper.isRequired()) {
+            findViewById<ConstraintLayout>(R.id.cardAutoStart).visibility = View.VISIBLE
+            baseCards.add(
+                makeCard(R.id.cardAutoStart, R.id.iconFrameAutoStart,
+                    R.id.tvTitleAutoStart, R.id.tvBadgeAutoStart,
+                    R.id.ivCheckAutoStart, R.id.tvDescAutoStart,
+                    R.id.btnAutoStart, btnAutoStart, ::isOemAutoStartGranted)
+            )
+        }
+
+        cards = baseCards
 
         cards.forEachIndexed { index, cardInfo ->
             cardInfo.card.setOnClickListener {
@@ -227,6 +253,9 @@ class SetupActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
                 data = android.net.Uri.parse("package:$packageName")
             })
+        }
+        btnAutoStart.setOnClickListener {
+            startActivity(OemAutoStartHelper.getAutoStartIntent(this))
         }
         btnContinueHome.setOnClickListener { finishSetup() }
         btnSetupLater.setOnClickListener { finishSetup() }
@@ -356,4 +385,7 @@ class SetupActivity : AppCompatActivity() {
         val pm = getSystemService(android.os.PowerManager::class.java)
         return pm.isIgnoringBatteryOptimizations(packageName)
     }
+
+    private fun isOemAutoStartGranted(): Boolean =
+        OemAutoStartHelper.isGranted(this)
 }

@@ -92,5 +92,14 @@
             </intent-filter>
         </receiver>
 
+        <!-- ACTION_POWER_CONNECTED is on Android's explicit exempt list for background
+             broadcast restrictions, so this manifest registration works even when the
+             app is killed. Used to restart PaymentAnnouncerService on charger connect. -->
+        <receiver android:name=".services.PowerConnectionReceiver" android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>
